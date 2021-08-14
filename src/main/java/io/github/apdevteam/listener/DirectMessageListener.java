@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,33 +20,39 @@ import java.awt.*;
 public class DirectMessageListener extends ListenerAdapter {
     @Override
     public void onPrivateMessageReceived(@Nonnull PrivateMessageReceivedEvent e) {
-        boolean foundGuild = false;
-        for(Guild g : e.getAuthor().getMutualGuilds()) {
-            if(g.getId().equals(Settings.INBOX_GUILD) || g.getId().equals(Settings.MAIN_GUILD)) {
-                foundGuild = true;
-                break;
-            }
-        }
+        if(e.getAuthor().isBot() || e.getAuthor().getId().equals(Settings.TOKEN))
+            return;
 
-        // Player is not in the guild, try to send a message to join
-        if(!foundGuild) {
+        /*
+        // Player is not in the guild, try to send an invite message
+        if(e.getAuthor().getMutualGuilds().size() < 1) {
             invite(e.getChannel(), e.getAuthor());
             return;
         }
+        */
 
         TextChannel modmail = ModMail.getInstance().getModMail(e.getAuthor());
         if(modmail == null) {
-            ModMail.getInstance().createModMail(e.getAuthor(), (
-                    textChannel -> {
-                        // do things?
-                    }
-            ));
+            try { // Try creating a channel and forwarding the message
+                ModMail.getInstance().createModMail(e.getAuthor(), (
+                        textChannel -> {
+                            // TODO: Create beginning message for modmail
+                            forward(e.getMessage(), textChannel);
+                        }
+                ));
+            }
+            catch (InsufficientPermissionException exception) { // Catch exception for no permissions
+                ModMail.getInstance().error(exception.getMessage());
+                //exception.printStackTrace();
+            }
             return;
         }
 
+        // Forward message
         forward(e.getMessage(), modmail);
     }
 
+    /*
     private void invite(@NotNull PrivateChannel channel, @NotNull User author) {
         MessageEmbed embed = EmbedUtils.buildEmbed(
                 null,
@@ -59,14 +66,12 @@ public class DirectMessageListener extends ListenerAdapter {
                 null,
                 error -> ModMail.getInstance().error("Failed to send invite embed '" + embed + "' to '" + author + "'")
         );
-    }
+    }*/
 
     private void forward(@NotNull Message msg, @NotNull TextChannel channel) {
         forwardText(msg, channel);
 
-        for(Message.Attachment attachment : msg.getAttachments()) {
-            forwardAttachment(attachment, channel);
-        }
+        forwardAttachments(msg, channel);
     }
 
     private void forwardText(@NotNull Message msg, @NotNull TextChannel channel) {
@@ -87,7 +92,13 @@ public class DirectMessageListener extends ListenerAdapter {
         );
     }
 
-    private void forwardAttachment(@NotNull Message.Attachment attachment, @NotNull TextChannel channel) {
+    private void forwardAttachments(@NotNull Message msg, @NotNull TextChannel channel) {
         // TODO
+        msg.getChannel().sendMessage(
+                "Bot does not currently support attachments."
+        ).queue(
+                null,
+                (error) -> ModMail.getInstance().error("Failed to send attachment warning in '" + channel + "'")
+        );
     }
 }

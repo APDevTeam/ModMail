@@ -1,12 +1,11 @@
 package io.github.apdevteam;
 
 import io.github.apdevteam.config.Settings;
+import io.github.apdevteam.listener.DirectMessageListener;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.entities.Category;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
@@ -60,21 +59,27 @@ public class ModMail {
     @Nullable
     private JDA jda = null;
     @Nullable
-    private Guild guild = null;
+    private Guild inboxGuild = null;
     @Nullable
-    private Category category = null;
+    private Category inboxCategory = null;
+    @Nullable
+    private Guild mainGuild = null;
 
     public ModMail() {
         JDABuilder builder = JDABuilder.createDefault(Settings.TOKEN);
-        builder.disableCache(CacheFlag.ACTIVITY);
-        builder.disableCache(CacheFlag.CLIENT_STATUS);
-        builder.disableCache(CacheFlag.EMOTE);
-        builder.disableCache(CacheFlag.MEMBER_OVERRIDES);
-        builder.disableCache(CacheFlag.ONLINE_STATUS);
-        builder.disableCache(CacheFlag.ROLE_TAGS);
-        builder.disableCache(CacheFlag.VOICE_STATE);
+        builder.disableCache(
+                CacheFlag.ACTIVITY,
+                CacheFlag.CLIENT_STATUS,
+                CacheFlag.EMOTE,
+                CacheFlag.MEMBER_OVERRIDES,
+                CacheFlag.ONLINE_STATUS,
+                CacheFlag.ROLE_TAGS,
+                CacheFlag.VOICE_STATE
+        );
         builder.setChunkingFilter(ChunkingFilter.NONE);
         builder.enableIntents(
+                GatewayIntent.GUILD_MEMBERS,
+                //GatewayIntent.GUILD_EMOJIS,
                 GatewayIntent.GUILD_MESSAGES,
                 GatewayIntent.GUILD_MESSAGE_REACTIONS,
                 GatewayIntent.DIRECT_MESSAGES,
@@ -95,29 +100,41 @@ public class ModMail {
 
         for(Guild g : jda.getGuilds()) {
             if(g.getId().equals(Settings.INBOX_GUILD)) {
-                guild = g;
-                System.out.println("Found guild: " + g.getName());
+                inboxGuild = g;
+                System.out.println("Found inbox guild: " + g.getName());
                 break;
             }
         }
-        if(guild == null) {
+        if(inboxGuild == null) {
             System.err.println("Failed to find Guild!");
             return;
         }
 
-        for(Category c : guild.getCategories()) {
+        for(Guild g : jda.getGuilds()) {
+            if(g.getId().equals(Settings.MAIN_GUILD)) {
+                mainGuild = g;
+                System.out.println("Found main guild: " + g.getName());
+                break;
+            }
+        }
+        if(mainGuild == null) {
+            System.err.println("Failed to find Guild!");
+            return;
+        }
+
+        for(Category c : inboxGuild.getCategories()) {
             if(c.getId().equals(Settings.INBOX_CATEGORY)) {
-                category = c;
+                inboxCategory = c;
                 System.out.println("Found category: " + c.getName());
                 break;
             }
         }
-        if(category == null) {
+        if(inboxCategory == null) {
             System.err.println("Failed to find Category!");
             return;
         }
 
-        // jda.addEventListener(new ReactionListener());
+        jda.addEventListener(new DirectMessageListener());
 
         System.out.println("Sucessfully booted!");
         instance = this;
@@ -140,23 +157,22 @@ public class ModMail {
 
     @Nullable
     public TextChannel getModMail(@NotNull User user) {
-        if(jda == null || guild == null)
+        if(jda == null || inboxGuild == null)
             throw new IllegalStateException("JDA is in an invalid state");
 
         String userID = user.getId();
-        for(TextChannel ch : guild.getTextChannels()) {
+        for(TextChannel ch : inboxGuild.getTextChannels()) {
             if(userID.equals(ch.getTopic()))
                 return ch;
         }
         return null;
     }
 
-    @Nullable
-    public void createModMail(@NotNull User user, @NotNull Consumer<TextChannel> callback) {
-        if(jda == null || guild == null || category == null)
+    public void createModMail(@NotNull User user, @NotNull Consumer<TextChannel> callback) throws InsufficientPermissionException {
+        if(jda == null || inboxGuild == null || inboxCategory == null)
             throw new IllegalStateException("JDA is in an invalid state");
 
-        guild.createTextChannel(user.getName(), category).queue(
+        inboxGuild.createTextChannel(user.getName(), inboxCategory).queue(
             callback,
             (error) -> error("Failed to create channel for '" + user + "'")
         );
