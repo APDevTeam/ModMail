@@ -53,7 +53,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>io.github.apdevteam.APModMail</mainClass>
+                            <mainClass>io.github.apdevteam.ModMail</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
