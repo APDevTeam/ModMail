@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -76,7 +77,8 @@ public class ModMail {
                 CacheFlag.ROLE_TAGS,
                 CacheFlag.VOICE_STATE
         );
-        builder.setChunkingFilter(ChunkingFilter.NONE);
+        builder.setChunkingFilter(ChunkingFilter.ALL);
+        builder.setMemberCachePolicy(MemberCachePolicy.ALL);
         builder.enableIntents(
                 GatewayIntent.GUILD_MEMBERS,
                 //GatewayIntent.GUILD_EMOJIS,
