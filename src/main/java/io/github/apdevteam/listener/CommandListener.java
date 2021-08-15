@@ -26,7 +26,7 @@ public class CommandListener extends ListenerAdapter {
         if (Settings.DEBUG)
             ModMail.getInstance().log("Received `'" + msg.getContentDisplay()
                     + "' from '" + u.getName() + "#" + u.getDiscriminator()
-                    + "' in '" + msg.getChannel() + "'`");
+                    + "' in '" + msg.getChannel() + "'`", Color.YELLOW);
 
         if (!msg.getGuild().getId().equals(Settings.INBOX_GUILD))
             return;
@@ -44,7 +44,7 @@ public class CommandListener extends ListenerAdapter {
                 reply(msg);
                 break;
             case "close":
-                // TODO
+                close(msg);
                 break;
             default:
                 invalidCommand(msg);
@@ -167,6 +167,36 @@ public class CommandListener extends ListenerAdapter {
                     )
                 )
             )
+        );
+    }
+
+    private void close(final @NotNull Message msg) {
+        final TextChannel inboxChannel = msg.getTextChannel();
+        String userID = inboxChannel.getTopic();
+        if(userID == null) {
+            invalidInbox(inboxChannel, msg);
+            return;
+        }
+
+        final User u = User.fromId(userID);
+        if (!u.getId().equals(inboxChannel.getTopic())) {
+            invalidInbox(inboxChannel, msg);
+            return;
+        }
+
+        inboxChannel.sendMessageEmbeds(EmbedUtils.buildEmbed(
+            null,
+            null,
+            "Closing is not yet supported.",
+            Color.RED,
+            null,
+            null,
+            null,
+            null,
+            null
+        )).queue(
+            null,
+            error -> ModMail.getInstance().error("Failed to warn: " + error.getMessage())
         );
     }
 
