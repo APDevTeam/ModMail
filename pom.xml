@@ -16,7 +16,7 @@
     </properties>
 
     <build>
-        <finalName>APModmail</finalName>
+        <finalName>APModMail</finalName>
         <sourceDirectory>src/main/java</sourceDirectory>
         <plugins>
             <plugin>

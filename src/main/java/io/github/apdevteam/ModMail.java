@@ -1,7 +1,9 @@
 package io.github.apdevteam;
 
 import io.github.apdevteam.config.Settings;
+import io.github.apdevteam.listener.CommandListener;
 import io.github.apdevteam.listener.DirectMessageListener;
+import io.github.apdevteam.utils.EmbedUtils;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.*;
@@ -14,6 +16,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.security.auth.login.LoginException;
+import java.awt.*;
+import java.time.OffsetDateTime;
 import java.util.function.Consumer;
 
 public class ModMail {
@@ -26,27 +30,30 @@ public class ModMail {
 
     public static void main(String @NotNull [] args) {
         for(String arg : args) {
-            if(arg.startsWith("-token=")) {
+            if(arg.startsWith("-token=")) { // Required
                 Settings.TOKEN = arg.split("=")[1];
             }
-            else if(arg.startsWith("-inbox=")) {
+            else if(arg.startsWith("-inbox=")) { // Required
                 Settings.INBOX_GUILD = arg.split("=")[1];
             }
-            else if(arg.startsWith("-category=")) {
+            else if(arg.startsWith("-category=")) { // Required
                 Settings.INBOX_CATEGORY = arg.split("=")[1];
             }
-            else if(arg.startsWith("-main=")) {
+            else if(arg.startsWith("-main=")) { // Required
                 Settings.MAIN_GUILD = arg.split("=")[1];
             }
-            else if(arg.startsWith("-invite=")) {
+            else if(arg.startsWith("-invite=")) { // Required
                 Settings.MAIN_INVITE = arg.split("=")[1];
             }
-            else if(arg.startsWith("-debug")) {
+            else if(arg.startsWith("-prefix=")) { // Optional
+                Settings.PREFIX = arg.split("=")[1];
+            }
+            else if(arg.startsWith("-debug")) { // Optional
                 Settings.DEBUG = true;
             }
         }
 
-        if("".equals(Settings.TOKEN)
+        if("".equals(Settings.TOKEN) || "".equals(Settings.PREFIX)
                 || "".equals(Settings.INBOX_GUILD) || "".equals(Settings.INBOX_CATEGORY)
                 || "".equals(Settings.MAIN_GUILD) || "".equals(Settings.MAIN_INVITE)
         ) {
@@ -137,6 +144,7 @@ public class ModMail {
         }
 
         jda.addEventListener(new DirectMessageListener());
+        jda.addEventListener(new CommandListener());
 
         System.out.println("Sucessfully booted!");
         instance = this;
@@ -158,7 +166,7 @@ public class ModMail {
 
 
     @Nullable
-    public TextChannel getModMail(@NotNull User user) {
+    public TextChannel getModMailInbox(@NotNull User user) {
         if(jda == null || inboxGuild == null)
             throw new IllegalStateException("JDA is in an invalid state");
 
@@ -170,13 +178,63 @@ public class ModMail {
         return null;
     }
 
-    public void createModMail(@NotNull User user, @NotNull Consumer<TextChannel> callback) throws InsufficientPermissionException {
+    public void getModMail(@NotNull User user, @Nullable Consumer<PrivateChannel> callback) {
+        if(jda == null)
+            throw new IllegalStateException("JDA is in an invalid state");
+
+        jda.openPrivateChannelById(user.getId()).queue(
+                callback,
+                error -> ModMail.getInstance().error("Failed to get ModMail for: '" + user.getName() + "#" + user.getDiscriminator() + "'")
+        );
+    }
+
+    public void createModMail(
+            @NotNull User user,
+            @NotNull OffsetDateTime timestamp,
+            @NotNull Consumer<TextChannel> callback
+    ) throws InsufficientPermissionException {
+
         if(jda == null || inboxGuild == null || inboxCategory == null)
             throw new IllegalStateException("JDA is in an invalid state");
 
+        // Create channel
         inboxGuild.createTextChannel(user.getName(), inboxCategory).queue(
-            callback,
-            (error) -> error("Failed to create channel for '" + user + "'")
+                (
+                        // Then set topic
+                        (Consumer<TextChannel>) channel -> channel.getManager().setTopic(user.getId()).queue(
+                                null,
+                                error -> ModMail.getInstance().error("Failed to set topic for '" + channel + "'")
+                        )
+                ).andThen(
+                        (
+                                // Then add initial message
+                                (Consumer<TextChannel>) channel -> channel.sendMessageEmbeds(
+                                        EmbedUtils.buildEmbed(
+                                                user.getName(),
+                                                user.getAvatarUrl(),
+                                                null,
+                                                Color.CYAN,
+                                                "ModMail thread started.",
+                                                "User ID: " + user.getId(),
+                                                timestamp,
+                                                user.getAvatarUrl(),
+                                                null
+                                        )
+                                ).queue(
+                                        null,
+                                        error -> ModMail.getInstance().error("Failed to send initial message for '" + channel + "'")
+                                )
+                        ).andThen(
+                                // Then call callback
+                                callback
+                        )
+                ),
+                (error) -> error("Failed to create channel for '" + user + "'")
         );
     }
+
+    /**
+     * "Thread Opened" as title
+     * "Tyler_#6544 has started a ModMail session." as text
+     */
 }
