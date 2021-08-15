@@ -26,7 +26,7 @@ public class DirectMessageListener extends ListenerAdapter {
 
         final Message msg = e.getMessage();
         if(Settings.DEBUG)
-            ModMail.getInstance().log("Received '" + msg.getContentDisplay() + "' from '" + u.getName() + "#" + u.getDiscriminator() + "'");
+            ModMail.getInstance().log("Received `'" + msg.getContentDisplay() + "' from '" + u.getName() + "#" + u.getDiscriminator() + "'`");
 
         boolean foundGuild = false;
         for(Guild g : u.getMutualGuilds()) {

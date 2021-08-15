@@ -24,9 +24,9 @@ public class CommandListener extends ListenerAdapter {
 
         final Message msg = e.getMessage();
         if (Settings.DEBUG)
-            ModMail.getInstance().log("Received '" + msg.getContentDisplay()
+            ModMail.getInstance().log("Received `'" + msg.getContentDisplay()
                     + "' from '" + u.getName() + "#" + u.getDiscriminator()
-                    + "' in '" + msg.getChannel() + "'");
+                    + "' in '" + msg.getChannel() + "'`");
 
         if (!msg.getGuild().getId().equals(Settings.INBOX_GUILD))
             return;
