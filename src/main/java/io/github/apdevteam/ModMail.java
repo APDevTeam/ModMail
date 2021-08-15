@@ -76,23 +76,23 @@ public class ModMail {
     public ModMail() {
         JDABuilder builder = JDABuilder.createDefault(Settings.TOKEN);
         builder.disableCache(
-                CacheFlag.ACTIVITY,
-                CacheFlag.CLIENT_STATUS,
-                CacheFlag.EMOTE,
-                CacheFlag.MEMBER_OVERRIDES,
-                CacheFlag.ONLINE_STATUS,
-                CacheFlag.ROLE_TAGS,
-                CacheFlag.VOICE_STATE
+            CacheFlag.ACTIVITY,
+            CacheFlag.CLIENT_STATUS,
+            CacheFlag.EMOTE,
+            CacheFlag.MEMBER_OVERRIDES,
+            CacheFlag.ONLINE_STATUS,
+            CacheFlag.ROLE_TAGS,
+            CacheFlag.VOICE_STATE
         );
         builder.setChunkingFilter(ChunkingFilter.ALL);
         builder.setMemberCachePolicy(MemberCachePolicy.ALL);
         builder.enableIntents(
-                GatewayIntent.GUILD_MEMBERS,
-                //GatewayIntent.GUILD_EMOJIS,
-                GatewayIntent.GUILD_MESSAGES,
-                GatewayIntent.GUILD_MESSAGE_REACTIONS,
-                GatewayIntent.DIRECT_MESSAGES,
-                GatewayIntent.DIRECT_MESSAGE_REACTIONS
+            GatewayIntent.GUILD_MEMBERS,
+            //GatewayIntent.GUILD_EMOJIS,
+            GatewayIntent.GUILD_MESSAGES,
+            GatewayIntent.GUILD_MESSAGE_REACTIONS,
+            GatewayIntent.DIRECT_MESSAGES,
+            GatewayIntent.DIRECT_MESSAGE_REACTIONS
         );
 
         // Add shutdown hook for CTRL+C
@@ -146,18 +146,22 @@ public class ModMail {
         jda.addEventListener(new DirectMessageListener());
         jda.addEventListener(new CommandListener());
 
-        System.out.println("Sucessfully booted!");
         instance = this;
+        log("Sucessfully booted!");
     }
 
     public void shutdown() {
         if(jda == null)
             return;
 
-        System.out.println("Shutting down...");
+        log("Shutting down...");
         jda.shutdown();
         jda = null;
         System.out.println("Shut down.");
+    }
+
+    public void log(String message) {
+        System.out.println(message);
     }
 
     public void error(String error) {
@@ -183,8 +187,8 @@ public class ModMail {
             throw new IllegalStateException("JDA is in an invalid state");
 
         jda.openPrivateChannelById(user.getId()).queue(
-                callback,
-                error -> ModMail.getInstance().error("Failed to get ModMail for: '" + user.getName() + "#" + user.getDiscriminator() + "'")
+            callback,
+            error -> ModMail.getInstance().error("Failed to get ModMail for: '" + user.getName() + "#" + user.getDiscriminator() + "'")
         );
     }
 
@@ -199,42 +203,37 @@ public class ModMail {
 
         // Create channel
         inboxGuild.createTextChannel(user.getName(), inboxCategory).queue(
+            (
+                // Then set topic
+                (Consumer<TextChannel>) channel -> channel.getManager().setTopic(user.getId()).queue(
+                    null,
+                    error -> ModMail.getInstance().error("Failed to set topic for '" + channel + "'")
+                )
+            ).andThen(
                 (
-                        // Then set topic
-                        (Consumer<TextChannel>) channel -> channel.getManager().setTopic(user.getId()).queue(
-                                null,
-                                error -> ModMail.getInstance().error("Failed to set topic for '" + channel + "'")
+                    // Then add initial message
+                    (Consumer<TextChannel>) channel -> channel.sendMessageEmbeds(
+                        EmbedUtils.buildEmbed(
+                            user.getName(),
+                            user.getAvatarUrl(),
+                            null,
+                            Color.CYAN,
+                            "ModMail thread started.",
+                            "User ID: " + user.getId(),
+                            timestamp,
+                            user.getAvatarUrl(),
+                            null
                         )
+                    ).queue(
+                        null,
+                        error -> ModMail.getInstance().error("Failed to send initial message for '" + channel + "'")
+                    )
                 ).andThen(
-                        (
-                                // Then add initial message
-                                (Consumer<TextChannel>) channel -> channel.sendMessageEmbeds(
-                                        EmbedUtils.buildEmbed(
-                                                user.getName(),
-                                                user.getAvatarUrl(),
-                                                null,
-                                                Color.CYAN,
-                                                "ModMail thread started.",
-                                                "User ID: " + user.getId(),
-                                                timestamp,
-                                                user.getAvatarUrl(),
-                                                null
-                                        )
-                                ).queue(
-                                        null,
-                                        error -> ModMail.getInstance().error("Failed to send initial message for '" + channel + "'")
-                                )
-                        ).andThen(
-                                // Then call callback
-                                callback
-                        )
-                ),
-                (error) -> error("Failed to create channel for '" + user + "'")
+                    // Then call callback
+                    callback
+                )
+            ),
+            (error) -> error("Failed to create channel for '" + user + "'")
         );
     }
-
-    /**
-     * "Thread Opened" as title
-     * "Tyler_#6544 has started a ModMail session." as text
-     */
 }

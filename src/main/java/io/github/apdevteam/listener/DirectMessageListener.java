@@ -26,7 +26,7 @@ public class DirectMessageListener extends ListenerAdapter {
 
         final Message msg = e.getMessage();
         if(Settings.DEBUG)
-            System.out.println("Received '" + msg.getContentDisplay() + "' from '" + u.getName() + "#" + u.getDiscriminator() + "'");
+            ModMail.getInstance().log("Received '" + msg.getContentDisplay() + "' from '" + u.getName() + "#" + u.getDiscriminator() + "'");
 
         boolean foundGuild = false;
         for(Guild g : u.getMutualGuilds()) {
@@ -83,34 +83,34 @@ public class DirectMessageListener extends ListenerAdapter {
 
     private void invite(final @NotNull PrivateChannel channel, final @NotNull User author) {
         final MessageEmbed embed = EmbedUtils.buildEmbed(
-                null,
-                null,
-                "Please join our discord server!",
-                Color.RED,
-                Settings.MAIN_INVITE,
-                null,
-                null,
-                null,
-                null
+            null,
+            null,
+            "Please join our discord server!",
+            Color.RED,
+            Settings.MAIN_INVITE,
+            null,
+            null,
+            null,
+            null
         );
         channel.sendMessageEmbeds(embed).queue(
-                null,
-                error -> ModMail.getInstance().error("Failed to send invite embed '" + embed + "' to '" + author + "'")
+            null,
+            error -> ModMail.getInstance().error("Failed to send invite embed '" + embed + "' to '" + author + "'")
         );
     }
 
     private void forward(final @NotNull Message msg, final @NotNull TextChannel channel) {
         EmbedUtils.forwardText(
-                msg.getAuthor(),
-                msg.getContentDisplay(),
-                channel,
-                Color.YELLOW,
-                message -> msg.addReaction("U+2705").queue(
-                        null,
-                        error -> ModMail.getInstance().error("Failed to checkbox '" + msg + "' in '" + channel + "'")
-                ),
-                "User",
-                msg.getTimeCreated()
+            msg.getAuthor(),
+            msg.getContentDisplay(),
+            channel,
+            Color.YELLOW,
+            message -> msg.addReaction("U+2705").queue(
+                null,
+                error -> ModMail.getInstance().error("Failed to checkbox '" + msg + "' in '" + channel + "'")
+            ),
+            "User",
+            msg.getTimeCreated()
         );
         EmbedUtils.forwardAttachments(msg, Color.YELLOW, channel);
     }

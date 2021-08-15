@@ -45,19 +45,19 @@ public class EmbedUtils {
                                    @NotNull OffsetDateTime timestamp
     ) {
         MessageEmbed embed = EmbedUtils.buildEmbed(
-                user.getName(),
-                user.getAvatarUrl(),
-                null,
-                color,
-                msg,
-                footer,
-                timestamp,
-                null,
-                null
+            user.getName(),
+            user.getAvatarUrl(),
+            null,
+            color,
+            msg,
+            footer,
+            timestamp,
+            null,
+            null
         );
         channel.sendMessageEmbeds(embed).queue(
-                callback,
-                error -> ModMail.getInstance().error("Failed to send '" + embed + "' in '" + channel + "'")
+            callback,
+            error -> ModMail.getInstance().error("Failed to send '" + embed + "' in '" + channel + "'")
         );
     }
 
@@ -69,10 +69,10 @@ public class EmbedUtils {
         // TODO
         if(msg.getAttachments().size() > 0) {
             msg.getChannel().sendMessage(
-                    "Bot does not currently support attachments."
+                "Bot does not currently support attachments."
             ).queue(
-                    null,
-                    error -> ModMail.getInstance().error("Failed to send attachment warning in '" + channel + "'")
+                null,
+                error -> ModMail.getInstance().error("Failed to send attachment warning in '" + channel + "'")
             );
         }
     }
