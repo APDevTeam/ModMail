@@ -165,30 +165,40 @@ public class ModMail {
         jda.addEventListener(new CommandListener());
 
         instance = this;
-        log("Sucessfully booted!");
+        log("Successfully booted!" + (Settings.DEBUG ? "\n\tDEBUG ENABLED" : ""), Color.GREEN);
     }
 
     public void shutdown() {
         if(jda == null)
             return;
 
-        log("Shutting down...");
+        log("Shutting down..." + (Settings.DEBUG ? "\n\tDEBUG ENABLED" : ""), Color.RED);
+        try {
+            Thread.sleep(5000);
+        }
+        catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         jda.shutdown();
         jda = null;
         System.out.println("Shut down.");
     }
 
     public void log(String message) {
+        log(message, Color.BLUE);
+    }
+
+    public void log(String message, Color color) {
         System.out.println(message);
 
         if(logChannel == null)
-            throw new IllegalStateException("JDA is in an invalid state");
+            error("JDA is in an invalid state");
 
         logChannel.sendMessageEmbeds(EmbedUtils.buildEmbed(
                 null,
                 null,
                 null,
-                Color.BLUE,
+                color,
                 message,
                 null,
                 null,
@@ -204,21 +214,21 @@ public class ModMail {
         System.err.println(message);
 
         if(logChannel == null)
-            throw new IllegalStateException("JDA is in an invalid state");
+            System.err.println("JDA is in an invalid state");
 
         logChannel.sendMessageEmbeds(EmbedUtils.buildEmbed(
-                null,
-                null,
-                null,
-                Color.RED,
-                message,
-                null,
-                null,
-                null,
-                null
+            null,
+            null,
+            null,
+            Color.RED,
+            message,
+            null,
+            null,
+            null,
+            null
         )).queue(
-                null,
-                error -> System.err.println(error.getMessage())
+            null,
+            error -> System.err.println(error.getMessage())
         );
     }
 
