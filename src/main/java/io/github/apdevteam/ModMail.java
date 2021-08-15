@@ -45,6 +45,9 @@ public class ModMail {
             else if(arg.startsWith("-invite=")) { // Required
                 Settings.MAIN_INVITE = arg.split("=")[1];
             }
+            else if(arg.startsWith("-log=")) { // Required
+                Settings.LOG_CHANNEL = arg.split("=")[1];
+            }
             else if(arg.startsWith("-prefix=")) { // Optional
                 Settings.PREFIX = arg.split("=")[1];
             }
@@ -56,6 +59,7 @@ public class ModMail {
         if("".equals(Settings.TOKEN) || "".equals(Settings.PREFIX)
                 || "".equals(Settings.INBOX_GUILD) || "".equals(Settings.INBOX_CATEGORY)
                 || "".equals(Settings.MAIN_GUILD) || "".equals(Settings.MAIN_INVITE)
+                || "".equals(Settings.LOG_CHANNEL)
         ) {
             System.err.println("Failed to load arguments, please read the code for 'help'.");
             return;
@@ -72,6 +76,8 @@ public class ModMail {
     private Category inboxCategory = null;
     @Nullable
     private Guild mainGuild = null;
+    @Nullable
+    private TextChannel logChannel = null;
 
     public ModMail() {
         JDABuilder builder = JDABuilder.createDefault(Settings.TOKEN);
@@ -143,6 +149,18 @@ public class ModMail {
             return;
         }
 
+        for(TextChannel ch : inboxGuild.getTextChannels()) {
+            if(ch.getId().equals(Settings.LOG_CHANNEL)) {
+                logChannel = ch;
+                System.out.println("Found channel: " + ch.getName());
+                break;
+            }
+        }
+        if(logChannel == null) {
+            System.err.println("Failed to find Channel!");
+            return;
+        }
+
         jda.addEventListener(new DirectMessageListener());
         jda.addEventListener(new CommandListener());
 
@@ -162,10 +180,46 @@ public class ModMail {
 
     public void log(String message) {
         System.out.println(message);
+
+        if(logChannel == null)
+            throw new IllegalStateException("JDA is in an invalid state");
+
+        logChannel.sendMessageEmbeds(EmbedUtils.buildEmbed(
+                null,
+                null,
+                null,
+                Color.BLUE,
+                message,
+                null,
+                null,
+                null,
+                null
+        )).queue(
+                null,
+                error -> error(error.getMessage())
+        );
     }
 
-    public void error(String error) {
-        System.err.println(error);
+    public void error(String message) {
+        System.err.println(message);
+
+        if(logChannel == null)
+            throw new IllegalStateException("JDA is in an invalid state");
+
+        logChannel.sendMessageEmbeds(EmbedUtils.buildEmbed(
+                null,
+                null,
+                null,
+                Color.RED,
+                message,
+                null,
+                null,
+                null,
+                null
+        )).queue(
+                null,
+                error -> System.err.println(error.getMessage())
+        );
     }
 
 

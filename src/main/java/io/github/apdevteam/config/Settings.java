@@ -8,4 +8,5 @@ public class Settings {
     public static String INBOX_CATEGORY = "";
     public static String MAIN_GUILD = "";
     public static String MAIN_INVITE = "";
+    public static String LOG_CHANNEL = "";
 }
