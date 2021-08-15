@@ -123,13 +123,14 @@ public class CommandListener extends ListenerAdapter {
             return;
         }
 
+        final String content = msg.getContentDisplay().substring(6);
         ModMail.getInstance().getModMail(
             u,
             // Forward text to DM
             (
                 (Consumer<PrivateChannel>) privateChannel -> EmbedUtils.forwardText(
                     msg.getAuthor(),
-                    msg.getContentDisplay(),
+                    content,
                     privateChannel,
                     Color.GREEN,
                     null,
@@ -141,7 +142,7 @@ public class CommandListener extends ListenerAdapter {
                 (
                     (Consumer<PrivateChannel>) privateChannel -> EmbedUtils.forwardText(
                         msg.getAuthor(),
-                        msg.getContentDisplay(),
+                        content,
                         inboxChannel,
                         Color.GREEN,
                         null,
