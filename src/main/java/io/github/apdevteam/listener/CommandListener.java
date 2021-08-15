@@ -58,55 +58,65 @@ public class CommandListener extends ListenerAdapter {
 
         TextChannel textChannel = ModMail.getInstance().getModMailInbox(u);
         if (textChannel != null) {
-            textChannel.sendMessageEmbeds(EmbedUtils.buildEmbed(
-                null,
-                null,
-                null,
-                Color.RED,
-                "This user already has a ModMail channel.",
-                null,
-                msg.getTimeCreated(),
-                null,
-                null
-            )).queue(
-                message -> msg.delete().queue(
+            try {
+                textChannel.sendMessageEmbeds(EmbedUtils.buildEmbed(
                     null,
-                    error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage())
-                ),
-                error -> ModMail.getInstance().error("Failed to send open ModMail warning: " + error.getMessage())
-            );
+                    null,
+                    null,
+                    Color.RED,
+                    "This user already has a ModMail channel.",
+                    null,
+                    null,
+                    null,
+                    null
+                )).queue(
+                    message -> msg.delete().queue(
+                        null,
+                        error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage())
+                    ),
+                    error -> ModMail.getInstance().error("Failed to send open ModMail warning: " + error.getMessage())
+                );
+            }
+            catch (InsufficientPermissionException error) {
+                ModMail.getInstance().error("Failed to delete message: " + error.getMessage());
+            }
             return;
         }
 
         // Create ModMail
-        ModMail.getInstance().createModMail(
-            u,
-            msg.getTimeCreated(),
-            channel -> ModMail.getInstance().getModMail(
+        try {
+            ModMail.getInstance().createModMail(
                 u,
-                // Inform player
-                privateChannel -> privateChannel.sendMessageEmbeds(
-                    EmbedUtils.buildEmbed(
-                        msg.getAuthor().getName(),
-                        msg.getAuthor().getAvatarUrl(),
-                        null,
-                        Color.YELLOW,
-                        "Opened a ModMail session.",
-                        null,
-                        null,
-                        null,
-                        null
+                msg.getTimeCreated(),
+                channel -> ModMail.getInstance().getModMail(
+                    u,
+                    // Inform player
+                    privateChannel -> privateChannel.sendMessageEmbeds(
+                        EmbedUtils.buildEmbed(
+                            msg.getAuthor().getName(),
+                            msg.getAuthor().getAvatarUrl(),
+                            null,
+                            Color.YELLOW,
+                            "Opened a ModMail session.",
+                            null,
+                            null,
+                            null,
+                            null
+                        )
+                    ).queue(
+                        // Delete command
+                        message -> msg.delete().queue(
+                            null,
+                            error -> ModMail.getInstance().error("Failed to delete open command: " + error.getMessage())
+                        ),
+                        error -> ModMail.getInstance().error("Failed to send open ModMail message: " + error.getMessage())
                     )
-                ).queue(
-                    // Delete command
-                    message -> msg.delete().queue(
-                        null,
-                        error -> ModMail.getInstance().error("Failed to delete open command: " + error.getMessage())
-                    ),
-                    error -> ModMail.getInstance().error("Failed to send open ModMail message: " + error.getMessage())
                 )
-            )
-        );
+            );
+        }
+        catch (InsufficientPermissionException error) {
+            ModMail.getInstance().error("Failed to delete message: " + error.getMessage());
+        }
     }
 
     private void reply(final @NotNull Message msg) {
@@ -124,50 +134,55 @@ public class CommandListener extends ListenerAdapter {
         }
 
         final String content = msg.getContentDisplay().substring(6);
-        ModMail.getInstance().getModMail(
-            u,
-            // Forward text to DM
-            (
-                (Consumer<PrivateChannel>) privateChannel -> EmbedUtils.forwardText(
-                    msg.getAuthor(),
-                    content,
-                    privateChannel,
-                    Color.GREEN,
-                    null,
-                    "Staff",
-                    msg.getTimeCreated()
-                )
-            // Forward text to inbox
-            ).andThen(
+        try {
+            ModMail.getInstance().getModMail(
+                u,
+                // Forward text to DM
                 (
                     (Consumer<PrivateChannel>) privateChannel -> EmbedUtils.forwardText(
                         msg.getAuthor(),
                         content,
-                        inboxChannel,
+                        privateChannel,
                         Color.GREEN,
                         null,
                         "Staff",
                         msg.getTimeCreated()
                     )
-                // Forward attachments to DM
+                    // Forward text to inbox
                 ).andThen(
                     (
-                        (Consumer<PrivateChannel>) privateChannel -> EmbedUtils.forwardAttachments(msg, Color.GREEN, privateChannel)
-                    // Forward attachments to inbox
+                        (Consumer<PrivateChannel>) privateChannel -> EmbedUtils.forwardText(
+                            msg.getAuthor(),
+                            content,
+                            inboxChannel,
+                            Color.GREEN,
+                            null,
+                            "Staff",
+                            msg.getTimeCreated()
+                        )
+                        // Forward attachments to DM
                     ).andThen(
                         (
-                            (Consumer<PrivateChannel>) privateChannel -> EmbedUtils.forwardAttachments(msg, Color.GREEN, inboxChannel)
-                        // Delete message
+                            (Consumer<PrivateChannel>) privateChannel -> EmbedUtils.forwardAttachments(msg, Color.GREEN, privateChannel)
+                            // Forward attachments to inbox
                         ).andThen(
-                            privateChannel -> msg.delete().queue(
-                                null,
-                                error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage())
+                            (
+                                (Consumer<PrivateChannel>) privateChannel -> EmbedUtils.forwardAttachments(msg, Color.GREEN, inboxChannel)
+                                // Delete message
+                            ).andThen(
+                                privateChannel -> msg.delete().queue(
+                                    null,
+                                    error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage())
+                                )
                             )
                         )
                     )
                 )
-            )
-        );
+            );
+        }
+        catch (InsufficientPermissionException error) {
+            ModMail.getInstance().error("Failed to delete: " + error.getMessage());
+        }
     }
 
     private void close(final @NotNull Message msg) {
@@ -201,7 +216,8 @@ public class CommandListener extends ListenerAdapter {
     }
 
     private void invalidInbox(final @NotNull TextChannel channel, final @NotNull Message msg) {
-        channel.sendMessageEmbeds(EmbedUtils.buildEmbed(
+        try {
+            channel.sendMessageEmbeds(EmbedUtils.buildEmbed(
                 null,
                 null,
                 null,
@@ -211,35 +227,39 @@ public class CommandListener extends ListenerAdapter {
                 msg.getTimeCreated(),
                 null,
                 null
-        )).queue(
+            )).queue(
                 message -> msg.delete().queue(
-                        null,
-                        error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage())
+                    null,
+                    error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage())
                 ),
                 error -> ModMail.getInstance().error("Failed to warn reply: " + error.getMessage())
-        );
+            );
+        }
+        catch (InsufficientPermissionException error) {
+            ModMail.getInstance().error("Failed to delete: " + error.getMessage());
+        }
     }
 
     private void invalidCommand(final @NotNull Message msg) {
         try {
             msg.getChannel().sendMessageEmbeds(
-                    EmbedUtils.buildEmbed(
-                            null,
-                            null,
-                            "Invalid command",
-                            Color.RED,
-                            msg.getContentDisplay(),
-                            null,
-                            msg.getTimeCreated(),
-                            null,
-                            null
-                    )
+                EmbedUtils.buildEmbed(
+                    null,
+                    null,
+                    "Invalid command",
+                    Color.RED,
+                    msg.getContentDisplay(),
+                    null,
+                    msg.getTimeCreated(),
+                    null,
+                    null
+                )
             ).queue(
-                    message -> msg.delete().queue(
-                            null,
-                            error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage())
-                    ),
-                    error -> ModMail.getInstance().error("Failed to send invalid command: " + error.getMessage())
+                message -> msg.delete().queue(
+                    null,
+                    error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage())
+                ),
+                error -> ModMail.getInstance().error("Failed to send invalid command: " + error.getMessage())
             );
         }
         catch (InsufficientPermissionException e) {
