@@ -165,14 +165,14 @@ public class ModMail {
         jda.addEventListener(new CommandListener());
 
         instance = this;
-        log("Successfully booted!" + (Settings.DEBUG ? "\n\tDEBUG ENABLED" : ""), Color.GREEN);
+        log("Successfully booted!" + (Settings.DEBUG ? "\n        DEBUG ENABLED" : ""), Color.GREEN);
     }
 
     public void shutdown() {
         if(jda == null)
             return;
 
-        log("Shutting down..." + (Settings.DEBUG ? "\n\tDEBUG ENABLED" : ""), Color.RED);
+        log("Shutting down..." + (Settings.DEBUG ? "\n        DEBUG ENABLED" : ""), Color.RED);
         try {
             Thread.sleep(5000);
         }

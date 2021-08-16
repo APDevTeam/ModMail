@@ -62,9 +62,9 @@ public class CommandListener extends ListenerAdapter {
                 textChannel.sendMessageEmbeds(EmbedUtils.buildEmbed(
                     null,
                     null,
-                    null,
-                    Color.RED,
                     "This user already has a ModMail channel.",
+                    Color.RED,
+                    null,
                     null,
                     null,
                     null,
@@ -220,9 +220,9 @@ public class CommandListener extends ListenerAdapter {
             channel.sendMessageEmbeds(EmbedUtils.buildEmbed(
                 null,
                 null,
-                null,
-                Color.RED,
                 "This is not a ModMail inbox.",
+                Color.RED,
+                null,
                 null,
                 msg.getTimeCreated(),
                 null,
