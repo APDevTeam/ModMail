@@ -68,8 +68,18 @@ public class EmbedUtils {
     ) {
         // TODO
         if(msg.getAttachments().size() > 0) {
-            msg.getChannel().sendMessage(
-                "Bot does not currently support attachments."
+            msg.getChannel().sendMessageEmbeds(
+                EmbedUtils.buildEmbed(
+                    null,
+                    null,
+                    "Bot does not currently support attachments.",
+                    Color.RED,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
+                )
             ).queue(
                 null,
                 error -> ModMail.getInstance().error("Failed to send attachment warning in '" + channel + "'")

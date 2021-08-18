@@ -27,7 +27,7 @@ public class DirectMessageListener extends ListenerAdapter {
         final Message msg = e.getMessage();
         if(Settings.DEBUG)
             ModMail.getInstance().log("Received `'" + msg.getContentDisplay()
-                    + "' from '" + u.getName() + "#" + u.getDiscriminator() + "'`");
+                    + "' from '" + u.getName() + "#" + u.getDiscriminator() + "'`", Color.YELLOW);
 
         boolean foundGuild = false;
         for(Guild g : u.getMutualGuilds()) {
@@ -47,28 +47,28 @@ public class DirectMessageListener extends ListenerAdapter {
         if(modMailInbox == null) {
             try { // Try creating a channel and forwarding the message
                 ModMail.getInstance().createModMail(
-                        u,
-                        msg.getTimeCreated(),
-                        (
-                                (Consumer<TextChannel>) channel -> forward(msg, channel)
-                        ).andThen(
-                                channel -> msg.getChannel().sendMessageEmbeds(
-                                        EmbedUtils.buildEmbed(
-                                            null,
-                                            null,
-                                            "Thank you for your message!",
-                                            Color.GREEN,
-                                            "The AP Admin team will get back to you as soon as possible!",
-                                            null,
-                                            null,
-                                            null,
-                                            null
-                                        )
-                                ).queue(
-                                    null,
-                                    error -> ModMail.getInstance().error("Failed to send initial message for '" + channel + "'")
-                                )
+                    u,
+                    msg.getTimeCreated(),
+                    (
+                        (Consumer<TextChannel>) channel -> forward(msg, channel)
+                    ).andThen(
+                        channel -> msg.getChannel().sendMessageEmbeds(
+                            EmbedUtils.buildEmbed(
+                                null,
+                                null,
+                                "Thank you for your message!",
+                                Color.GREEN,
+                                "The AP Admin team will get back to you as soon as possible!",
+                                null,
+                                null,
+                                null,
+                                null
+                            )
+                        ).queue(
+                            null,
+                            error -> ModMail.getInstance().error("Failed to send initial message for '" + channel + "'")
                         )
+                    )
                 );
             }
             catch (InsufficientPermissionException exception) { // Catch exception for no permissions
