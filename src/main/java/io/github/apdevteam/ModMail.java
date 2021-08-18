@@ -165,14 +165,14 @@ public class ModMail {
         jda.addEventListener(new CommandListener());
 
         instance = this;
-        log("Successfully booted!" + (Settings.DEBUG ? "\n        DEBUG ENABLED" : ""), Color.GREEN);
+        log("Successfully booted!" + (Settings.DEBUG ? "\n        DEBUG ENABLED" : ""), Color.GREEN, true);
     }
 
     public void shutdown() {
         if(jda == null)
             return;
 
-        log("Shutting down..." + (Settings.DEBUG ? "\n        DEBUG ENABLED" : ""), Color.RED);
+        log("Shutting down..." + (Settings.DEBUG ? "\n        DEBUG ENABLED" : ""), Color.RED, true);
         try {
             Thread.sleep(5000);
         }
@@ -185,28 +185,32 @@ public class ModMail {
     }
 
     public void log(String message) {
-        log(message, Color.BLUE);
+        log(message, Color.BLUE, false);
     }
 
     public void log(String message, Color color) {
+        log(message, color, false);
+    }
+
+    private void log(String message, Color color, boolean bold) {
         System.out.println(message);
 
         if(logChannel == null)
             error("JDA is in an invalid state");
 
         logChannel.sendMessageEmbeds(EmbedUtils.buildEmbed(
-                null,
-                null,
-                null,
-                color,
-                message,
-                null,
-                null,
-                null,
-                null
+            null,
+            null,
+            bold ? message : null, // Send as title if bold
+            color,
+            bold ? null : message, // Send as text if not bold
+            null,
+            null,
+            null,
+            null
         )).queue(
-                null,
-                error -> error(error.getMessage())
+            null,
+            error -> error(error.getMessage())
         );
     }
 
@@ -228,7 +232,14 @@ public class ModMail {
             null
         )).queue(
             null,
-            error -> System.err.println(error.getMessage())
+            error ->  {
+                System.err.println(error.getMessage());
+                // Try sending a simple message if the embed failed
+                logChannel.sendMessage("Failed to send: " + message).queue(
+                    null,
+                    null
+                );
+            }
         );
     }
 
