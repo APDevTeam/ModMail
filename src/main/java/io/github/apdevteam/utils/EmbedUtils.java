@@ -11,18 +11,22 @@ import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class EmbedUtils {
-    public static @NotNull MessageEmbed buildEmbed(@Nullable String author,
-                                                   @Nullable String authorIcon,
-                                                   @Nullable String title,
-                                                   @NotNull Color color,
-                                                   @Nullable String text,
-                                                   @Nullable String footer,
-                                                   @Nullable OffsetDateTime timestamp,
-                                                   @Nullable String thumbnail,
-                                                   @Nullable String image
+    public static @NotNull MessageEmbed buildEmbed(
+        @Nullable String author,
+        @Nullable String authorIcon,
+        @Nullable String title,
+        @NotNull Color color,
+        @Nullable String text,
+        @Nullable String footer,
+        @Nullable OffsetDateTime timestamp,
+        @Nullable String thumbnail,
+        @Nullable String image
     ) {
         EmbedBuilder eb = new EmbedBuilder();
         eb.setAuthor(author, null, authorIcon);
@@ -36,13 +40,14 @@ public class EmbedUtils {
         return eb.build();
     }
 
-    public static void forwardText(final @NotNull User user,
-                                   final @NotNull String msg,
-                                   final @NotNull MessageChannel channel,
-                                   @NotNull Color color,
-                                   final Consumer<Message> callback,
-                                   @NotNull String footer,
-                                   @NotNull OffsetDateTime timestamp
+    public static void forwardText(
+        final @NotNull User user,
+        final @NotNull String msg,
+        final @NotNull MessageChannel channel,
+        @NotNull Color color,
+        final Consumer<Message> callback,
+        @NotNull String footer,
+        @NotNull OffsetDateTime timestamp
     ) {
         MessageEmbed embed = EmbedUtils.buildEmbed(
             user.getName(),
@@ -62,28 +67,107 @@ public class EmbedUtils {
     }
 
     public static void forwardAttachments(
-            final @NotNull Message msg,
-            @NotNull Color color,
-            final @NotNull MessageChannel channel
+        final @NotNull User user,
+        final @NotNull Collection<MessageChannel> channels,
+        final @NotNull List<Message.Attachment> attachments,
+        @NotNull Color color,
+        @NotNull String footer,
+        @NotNull OffsetDateTime timestamp
     ) {
-        // TODO
-        if(msg.getAttachments().size() > 0) {
-            msg.getChannel().sendMessageEmbeds(
-                EmbedUtils.buildEmbed(
-                    null,
-                    null,
-                    "Bot does not currently support attachments.",
-                    Color.RED,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null
-                )
-            ).queue(
+        if(attachments.size() < 1)
+            return;
+
+        ArrayList<MessageEmbed> embeds = new ArrayList<>();
+        for(Message.Attachment a : attachments) {
+            embeds.add(formatAttachment(user, a, color, footer, timestamp));
+        }
+
+        for(MessageChannel channel : channels) {
+            channel.sendMessageEmbeds(embeds).queue(
                 null,
-                error -> ModMail.getInstance().error("Failed to send attachment warning in '" + channel + "'")
+                error -> ModMail.getInstance().error("Failed to send attachments: " + error.getMessage())
             );
         }
     }
+
+    private static @NotNull MessageEmbed formatAttachment(
+        final @NotNull User user,
+        @NotNull Message.Attachment attachment,
+        @NotNull Color color,
+        @NotNull String footer,
+        @NotNull OffsetDateTime timestamp
+    ) {
+        if(attachment.isImage())
+            return formatImage(user, attachment, color, footer, timestamp);
+        if(attachment.isVideo())
+            return formatVideo(user, attachment, color, footer, timestamp);
+
+        String contentType = attachment.getContentType();
+        if(contentType == null)
+            contentType = "null";
+        return formatOther(user, attachment, color, footer, timestamp, contentType);
+    }
+
+    private static @NotNull MessageEmbed formatImage(
+        final @NotNull User user,
+        @NotNull Message.Attachment attachment,
+        @NotNull Color color,
+        @NotNull String footer,
+        @NotNull OffsetDateTime timestamp
+    ) {
+        return buildEmbed(
+                user.getName(),
+                user.getAvatarUrl(),
+                null,
+                color,
+                null,
+                footer,
+                timestamp,
+                null,
+                attachment.getUrl()
+        );
+    }
+
+    private static @NotNull MessageEmbed formatVideo(
+            final @NotNull User user,
+            @NotNull Message.Attachment attachment,
+            @NotNull Color color,
+            @NotNull String footer,
+            @NotNull OffsetDateTime timestamp
+    ) {
+        return buildEmbed(
+                user.getName(),
+                user.getAvatarUrl(),
+                "Video",
+                color,
+                attachment.getUrl(),
+                footer,
+                timestamp,
+                null,
+                null
+        );
+    }
+
+    private static @NotNull MessageEmbed formatOther(
+            final @NotNull User user,
+            @NotNull Message.Attachment attachment,
+            @NotNull Color color,
+            @NotNull String footer,
+            @NotNull OffsetDateTime timestamp,
+            @NotNull String contentType
+    ) {
+        return buildEmbed(
+                user.getName(),
+                user.getAvatarUrl(),
+                contentType,
+                color,
+                attachment.getUrl(),
+                footer,
+                timestamp,
+                null,
+                null
+        );
+    }
+
+
 }
