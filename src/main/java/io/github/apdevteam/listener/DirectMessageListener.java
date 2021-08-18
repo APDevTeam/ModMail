@@ -15,6 +15,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
+import java.util.Collections;
 import java.util.function.Consumer;
 
 public class DirectMessageListener extends ListenerAdapter {
@@ -107,7 +108,14 @@ public class DirectMessageListener extends ListenerAdapter {
             channel,
             Color.YELLOW,
             message -> msg.addReaction("U+2705").queue(
-                    unused -> EmbedUtils.forwardAttachments(msg, Color.YELLOW, channel),
+                    unused -> EmbedUtils.forwardAttachments(
+                        msg.getAuthor(),
+                        Collections.singletonList(channel),
+                        msg.getAttachments(),
+                        Color.YELLOW,
+                        "User",
+                        msg.getTimeCreated()
+                    ),
                     error -> ModMail.getInstance().error("Failed to checkbox '" + msg + "' in '" + channel + "'")
             ),
             "User",
