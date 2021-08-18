@@ -54,7 +54,27 @@ public class CommandListener extends ListenerAdapter {
 
     private void open(final @NotNull Message msg) {
         String userID = msg.getContentStripped().substring(1).split(" ")[1];
-        final User u = User.fromId(userID);
+        final User u;
+        try {
+            u = User.fromId(userID);
+        }
+        catch (NumberFormatException e) {
+            msg.getChannel().sendMessageEmbeds(EmbedUtils.buildEmbed(
+                    null,
+                    null,
+                    "Invalid User ID",
+                    Color.RED,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
+            )).queue(
+                    null,
+                    error -> ModMail.getInstance().error("Failed warn invalid ID: " + error.getMessage())
+            );
+            return;
+        }
 
         TextChannel textChannel = ModMail.getInstance().getModMailInbox(u);
         if (textChannel != null) {
@@ -127,7 +147,28 @@ public class CommandListener extends ListenerAdapter {
             return;
         }
 
-        final User u = User.fromId(userID);
+        final User u;
+        try {
+            u = User.fromId(userID);
+        }
+        catch (NumberFormatException e) {
+            msg.getChannel().sendMessageEmbeds(EmbedUtils.buildEmbed(
+                    null,
+                    null,
+                    "Invalid User ID",
+                    Color.RED,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
+            )).queue(
+                    null,
+                    error -> ModMail.getInstance().error("Failed warn invalid ID: " + error.getMessage())
+            );
+            return;
+        }
+
         if (!u.getId().equals(inboxChannel.getTopic())) {
             invalidInbox(inboxChannel, msg);
             return;
