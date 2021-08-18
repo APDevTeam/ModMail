@@ -107,12 +107,11 @@ public class DirectMessageListener extends ListenerAdapter {
             channel,
             Color.YELLOW,
             message -> msg.addReaction("U+2705").queue(
-                null,
-                error -> ModMail.getInstance().error("Failed to checkbox '" + msg + "' in '" + channel + "'")
+                    unused -> EmbedUtils.forwardAttachments(msg, Color.YELLOW, channel),
+                    error -> ModMail.getInstance().error("Failed to checkbox '" + msg + "' in '" + channel + "'")
             ),
             "User",
             msg.getTimeCreated()
         );
-        EmbedUtils.forwardAttachments(msg, Color.YELLOW, channel);
     }
 }
