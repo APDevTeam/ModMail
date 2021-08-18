@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
+import java.util.Arrays;
 import java.util.function.Consumer;
 
 public class CommandListener extends ListenerAdapter {
@@ -189,7 +190,7 @@ public class CommandListener extends ListenerAdapter {
                         "Staff",
                         msg.getTimeCreated()
                     )
-                    // Forward text to inbox
+                // Forward text to inbox
                 ).andThen(
                     (
                         (Consumer<PrivateChannel>) privateChannel -> EmbedUtils.forwardText(
@@ -201,20 +202,22 @@ public class CommandListener extends ListenerAdapter {
                             "Staff",
                             msg.getTimeCreated()
                         )
-                        // Forward attachments to DM
+                    // Forward attachments to DM & inbox
                     ).andThen(
                         (
-                            (Consumer<PrivateChannel>) privateChannel -> EmbedUtils.forwardAttachments(msg, Color.GREEN, privateChannel)
-                            // Forward attachments to inbox
+                            (Consumer<PrivateChannel>) privateChannel -> EmbedUtils.forwardAttachments(
+                                msg.getAuthor(),
+                                Arrays.asList(privateChannel, inboxChannel),
+                                msg.getAttachments(),
+                                Color.GREEN,
+                                "Staff",
+                                msg.getTimeCreated()
+                            )
+                        // Delete message
                         ).andThen(
-                            (
-                                (Consumer<PrivateChannel>) privateChannel -> EmbedUtils.forwardAttachments(msg, Color.GREEN, inboxChannel)
-                                // Delete message
-                            ).andThen(
-                                privateChannel -> msg.delete().queue(
-                                    null,
-                                    error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage())
-                                )
+                            privateChannel -> msg.delete().queue(
+                                null,
+                                error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage())
                             )
                         )
                     )
