@@ -17,6 +17,10 @@ public class InboxListener extends ListenerAdapter {
             return;
 
         final Message msg = e.getMessage();
+        String content = msg.getContentStripped();
+        if(content.startsWith(Settings.PREFIX))
+            return;
+
         final TextChannel inboxChannel = msg.getTextChannel();
         String userID = inboxChannel.getTopic();
         if(userID == null) {
