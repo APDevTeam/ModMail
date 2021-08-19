@@ -49,6 +49,11 @@ public class EmbedUtils {
         @NotNull String footer,
         @NotNull OffsetDateTime timestamp
     ) {
+        if("".equals(msg)) {
+            callback.accept(null);
+            return; // Don't send empty text headers for attachment only messages
+        }
+
         MessageEmbed embed = EmbedUtils.buildEmbed(
                 user.getName(),
                 user.getAvatarUrl(),
