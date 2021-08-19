@@ -1,7 +1,9 @@
 package io.github.apdevteam.utils;
 
+import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedWriter;
@@ -57,12 +59,12 @@ public class LogUtils {
         if(!f.exists() || !f.canRead() || !f.canWrite() || f.isDirectory())
             failure.accept(new Throwable("Does not exist / can't read / can't write / is directory").fillInStackTrace());
 
-        channel.sendFile(f).queue(
-                ((Consumer<Message>) message -> {
-                    if (!f.delete())
-                        failure.accept(new Throwable("Failed to delete file").fillInStackTrace());
-                }).andThen(success),
-                failure
+        channel.sendMessage(userID).addFile(f).queue(
+            ((Consumer<Message>) message -> {
+                if (!f.delete())
+                    failure.accept(new Throwable("Failed to delete file").fillInStackTrace());
+            }).andThen(success),
+            failure
         );
     }
 }
