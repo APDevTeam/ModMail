@@ -48,6 +48,9 @@ public class ModMail {
             else if(arg.startsWith("-log=")) { // Required
                 Settings.LOG_CHANNEL = arg.split("=")[1];
             }
+            else if(arg.startsWith("-archive=")) { // Required
+                Settings.ARCHIVE_CHANNEL = arg.split("=")[1];
+            }
             else if(arg.startsWith("-prefix=")) { // Optional
                 Settings.PREFIX = arg.split("=")[1];
             }
@@ -57,9 +60,9 @@ public class ModMail {
         }
 
         if("".equals(Settings.TOKEN) || "".equals(Settings.PREFIX)
-                || "".equals(Settings.INBOX_GUILD) || "".equals(Settings.INBOX_CATEGORY)
-                || "".equals(Settings.MAIN_GUILD) || "".equals(Settings.MAIN_INVITE)
-                || "".equals(Settings.LOG_CHANNEL)
+            || "".equals(Settings.INBOX_GUILD) || "".equals(Settings.INBOX_CATEGORY)
+            || "".equals(Settings.MAIN_GUILD) || "".equals(Settings.MAIN_INVITE)
+            || "".equals(Settings.LOG_CHANNEL) || "".equals(Settings.ARCHIVE_CHANNEL)
         ) {
             System.err.println("Failed to load arguments, please read the code for 'help'.");
             return;
@@ -78,6 +81,8 @@ public class ModMail {
     private Guild mainGuild = null;
     @Nullable
     private TextChannel logChannel = null;
+    @Nullable
+    private TextChannel archiveChannel = null;
 
     public ModMail() {
         JDABuilder builder = JDABuilder.createDefault(Settings.TOKEN);
@@ -114,18 +119,6 @@ public class ModMail {
         }
 
         for(Guild g : jda.getGuilds()) {
-            if(g.getId().equals(Settings.INBOX_GUILD)) {
-                inboxGuild = g;
-                System.out.println("Found inbox guild: " + g.getName());
-                break;
-            }
-        }
-        if(inboxGuild == null) {
-            System.err.println("Failed to find Guild!");
-            return;
-        }
-
-        for(Guild g : jda.getGuilds()) {
             if(g.getId().equals(Settings.MAIN_GUILD)) {
                 mainGuild = g;
                 System.out.println("Found main guild: " + g.getName());
@@ -133,31 +126,54 @@ public class ModMail {
             }
         }
         if(mainGuild == null) {
-            System.err.println("Failed to find Guild!");
+            System.err.println("Failed to find main guild!");
+            return;
+        }
+
+        for(Guild g : jda.getGuilds()) {
+            if(g.getId().equals(Settings.INBOX_GUILD)) {
+                inboxGuild = g;
+                System.out.println("Found inbox guild: " + g.getName());
+                break;
+            }
+        }
+        if(inboxGuild == null) {
+            System.err.println("Failed to find inbox guild!");
             return;
         }
 
         for(Category c : inboxGuild.getCategories()) {
             if(c.getId().equals(Settings.INBOX_CATEGORY)) {
                 inboxCategory = c;
-                System.out.println("Found category: " + c.getName());
+                System.out.println("Found inbox category: " + c.getName());
                 break;
             }
         }
         if(inboxCategory == null) {
-            System.err.println("Failed to find Category!");
+            System.err.println("Failed to find category!");
             return;
         }
 
         for(TextChannel ch : inboxGuild.getTextChannels()) {
             if(ch.getId().equals(Settings.LOG_CHANNEL)) {
                 logChannel = ch;
-                System.out.println("Found channel: " + ch.getName());
+                System.out.println("Found log channel: " + ch.getName());
                 break;
             }
         }
         if(logChannel == null) {
-            System.err.println("Failed to find Channel!");
+            System.err.println("Failed to find log channel!");
+            return;
+        }
+
+        for(TextChannel ch : inboxGuild.getTextChannels()) {
+            if(ch.getId().equals(Settings.ARCHIVE_CHANNEL)) {
+                archiveChannel = ch;
+                System.out.println("Found archive channel: " + ch.getName());
+            }
+        }
+        if(archiveChannel == null) {
+            System.err.println("Failed to find archive channel!");
             return;
         }
 
@@ -268,9 +284,9 @@ public class ModMail {
     }
 
     public void createModMail(
-            @NotNull User user,
-            @NotNull OffsetDateTime timestamp,
-            @NotNull Consumer<TextChannel> callback
+        @NotNull User user,
+        @NotNull OffsetDateTime timestamp,
+        @NotNull Consumer<TextChannel> callback
     ) throws InsufficientPermissionException {
 
         if(jda == null || inboxGuild == null || inboxCategory == null)
@@ -311,4 +327,17 @@ public class ModMail {
             (error) -> error("Failed to create channel for '" + user + "'")
         );
     }
+
+    @NotNull
+    public TextChannel getArchiveChannel() {
+        if(archiveChannel == null)
+            throw new IllegalStateException("JDA is in an invalid state");
+
+        return archiveChannel;
+    }
+
+    /* TODO:
+        - Add closing from the player's end
+        - Add the ability to add staff teams (with fancy reacts maybe?)
+     */
 }

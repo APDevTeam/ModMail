@@ -49,17 +49,21 @@ public class EmbedUtils {
         @NotNull String footer,
         @NotNull OffsetDateTime timestamp
     ) {
+        if(!LogUtils.log(user, user.getName(), msg))
+            ModMail.getInstance().error("Failed to log message '" + user + ": " + msg + "'");
+
         MessageEmbed embed = EmbedUtils.buildEmbed(
-            user.getName(),
-            user.getAvatarUrl(),
-            null,
-            color,
-            msg,
-            footer,
-            timestamp,
-            null,
-            null
+                user.getName(),
+                user.getAvatarUrl(),
+                null,
+                color,
+                msg,
+                footer,
+                timestamp,
+                null,
+                null
         );
+
         channel.sendMessageEmbeds(embed).queue(
             callback,
             error -> ModMail.getInstance().error("Failed to send '" + embed + "' in '" + channel + "'")
@@ -79,6 +83,9 @@ public class EmbedUtils {
 
         ArrayList<MessageEmbed> embeds = new ArrayList<>();
         for(Message.Attachment a : attachments) {
+            if(!LogUtils.log(user, user.getName(), "Attachment <" + a.getContentType() + ">: " + a.getUrl()))
+                ModMail.getInstance().error("Failed to log attachment '" + user + ": " + a.getUrl() + "'");
+
             embeds.add(formatAttachment(user, a, color, footer, timestamp));
         }
 
@@ -105,6 +112,7 @@ public class EmbedUtils {
         String contentType = attachment.getContentType();
         if(contentType == null)
             contentType = "null";
+
         return formatOther(user, attachment, color, footer, timestamp, contentType);
     }
 
@@ -116,15 +124,15 @@ public class EmbedUtils {
         @NotNull OffsetDateTime timestamp
     ) {
         return buildEmbed(
-                user.getName(),
-                user.getAvatarUrl(),
-                null,
-                color,
-                null,
-                footer,
-                timestamp,
-                null,
-                attachment.getUrl()
+            user.getName(),
+            user.getAvatarUrl(),
+            null,
+            color,
+            null,
+            footer,
+            timestamp,
+            null,
+            attachment.getUrl()
         );
     }
 
@@ -136,15 +144,15 @@ public class EmbedUtils {
             @NotNull OffsetDateTime timestamp
     ) {
         return buildEmbed(
-                user.getName(),
-                user.getAvatarUrl(),
-                "Video",
-                color,
-                attachment.getUrl(),
-                footer,
-                timestamp,
-                null,
-                null
+            user.getName(),
+            user.getAvatarUrl(),
+            "Video",
+            color,
+            attachment.getUrl(),
+            footer,
+            timestamp,
+            null,
+            null
         );
     }
 
@@ -157,17 +165,15 @@ public class EmbedUtils {
             @NotNull String contentType
     ) {
         return buildEmbed(
-                user.getName(),
-                user.getAvatarUrl(),
-                contentType,
-                color,
-                attachment.getUrl(),
-                footer,
-                timestamp,
-                null,
-                null
+            user.getName(),
+            user.getAvatarUrl(),
+            contentType,
+            color,
+            attachment.getUrl(),
+            footer,
+            timestamp,
+            null,
+            null
         );
     }
-
-
 }

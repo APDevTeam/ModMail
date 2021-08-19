@@ -3,7 +3,9 @@ package io.github.apdevteam.listener;
 import io.github.apdevteam.ModMail;
 import io.github.apdevteam.config.Settings;
 import io.github.apdevteam.utils.EmbedUtils;
+import io.github.apdevteam.utils.LogUtils;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
@@ -26,8 +28,8 @@ public class CommandListener extends ListenerAdapter {
         final Message msg = e.getMessage();
         if (Settings.DEBUG)
             ModMail.getInstance().log("Received `'" + msg.getContentDisplay()
-                    + "' from '" + u.getName() + "#" + u.getDiscriminator()
-                    + "' in '" + msg.getChannel() + "'`", Color.YELLOW);
+                + "' from '" + u.getName() + "#" + u.getDiscriminator()
+                + "' in '" + msg.getChannel() + "'`", Color.YELLOW);
 
         if (!msg.getGuild().getId().equals(Settings.INBOX_GUILD))
             return;
@@ -61,18 +63,18 @@ public class CommandListener extends ListenerAdapter {
         }
         catch (NumberFormatException e) {
             msg.getChannel().sendMessageEmbeds(EmbedUtils.buildEmbed(
-                    null,
-                    null,
-                    "Invalid User ID",
-                    Color.RED,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null
+                null,
+                null,
+                "Invalid User ID",
+                Color.RED,
+                null,
+                null,
+                null,
+                null,
+                null
             )).queue(
-                    null,
-                    error -> ModMail.getInstance().error("Failed warn invalid ID: " + error.getMessage())
+                null,
+                error -> ModMail.getInstance().error("Failed warn invalid ID: " + error.getMessage())
             );
             return;
         }
@@ -154,18 +156,18 @@ public class CommandListener extends ListenerAdapter {
         }
         catch (NumberFormatException e) {
             msg.getChannel().sendMessageEmbeds(EmbedUtils.buildEmbed(
-                    null,
-                    null,
-                    "Invalid User ID",
-                    Color.RED,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null
+                null,
+                null,
+                "Invalid User ID",
+                Color.RED,
+                null,
+                null,
+                null,
+                null,
+                null
             )).queue(
-                    null,
-                    error -> ModMail.getInstance().error("Failed warn invalid ID: " + error.getMessage())
+                null,
+                error -> ModMail.getInstance().error("Failed warn invalid ID: " + error.getMessage())
             );
             return;
         }
@@ -243,20 +245,61 @@ public class CommandListener extends ListenerAdapter {
             return;
         }
 
-        inboxChannel.sendMessageEmbeds(EmbedUtils.buildEmbed(
-            null,
-            null,
-            "Closing is not yet supported.",
+        // Log closing
+        LogUtils.log(u, msg.getAuthor().getName(), "[Closed thread]");
+
+        MessageEmbed embed = EmbedUtils.buildEmbed(
+            msg.getAuthor().getName(),
+            msg.getAuthor().getAvatarUrl(),
+            "Thread Closed",
             Color.RED,
             null,
-            null,
-            null,
+            "Staff",
+            msg.getTimeCreated(),
             null,
             null
-        )).queue(
-            null,
-            error -> ModMail.getInstance().error("Failed to warn: " + error.getMessage())
         );
+        // Inform inbox
+        inboxChannel.sendMessageEmbeds(embed).queue(
+            message -> ModMail.getInstance().getModMail(
+                u,
+                // Inform DM
+                privateChannel -> privateChannel.sendMessageEmbeds(embed).queue(
+                    // Archive channel
+                    dm -> LogUtils.archive(u, ModMail.getInstance().getArchiveChannel(),
+                        // Delete channel
+                        unused -> inboxChannel.delete().queue(
+                            null,
+                            error -> ModMail.getInstance().error("Failed to delete channel: " + error.getMessage())
+                        ),
+                        // Error logging
+                        error -> {
+                            ModMail.getInstance().error("Failed to close modmail of " + u.getId() + ": " + error.getMessage());
+                            inboxChannel.sendMessageEmbeds(EmbedUtils.buildEmbed(
+                                null,
+                                null,
+                                "Failed to close channel.",
+                                Color.RED,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null
+                            )).queue(
+                                null,
+                                bad -> ModMail.getInstance().error("Failed to inform inbox of close failure: " + bad.getMessage())
+                            );
+                        }
+                    ),
+                    error -> ModMail.getInstance().error("Failed to inform DM of close: " + error.getMessage())
+                )
+            ),
+            error -> ModMail.getInstance().error("Failed to inform inbox of close: " + error.getMessage())
+        );
+
+
+
+
     }
 
     private void invalidInbox(final @NotNull TextChannel channel, final @NotNull Message msg) {
