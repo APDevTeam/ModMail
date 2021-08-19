@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -32,15 +33,14 @@ public class LogUtils {
         if(!f.exists() || !f.canRead() || !f.canWrite() || f.isDirectory())
             return false;
 
-        FileWriter writer;
         try {
-            writer = new FileWriter(f);
-            writer.append(new SimpleDateFormat("[MM/dd/yyyy HH:mm:ss] ").format(new Date()));
-            writer.append(username);
-            writer.append(": ");
-            writer.append(message);
-            writer.append("\n");
-            writer.close();
+            BufferedWriter buffer = new BufferedWriter(new FileWriter(f, true));
+            buffer.write(new SimpleDateFormat("[MM/dd/yyyy HH:mm:ss] ").format(new Date()));
+            buffer.write(username);
+            buffer.write(": ");
+            buffer.write(message);
+            buffer.write("\n");
+            buffer.close();
         } catch (IOException e) {
             return false;
         }
