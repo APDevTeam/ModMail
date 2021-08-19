@@ -52,7 +52,28 @@ public class DirectMessageListener extends ListenerAdapter {
                     u,
                     msg.getTimeCreated(),
                     (
-                        (Consumer<TextChannel>) channel -> {
+                        // Forward message to inbox
+                        (Consumer<TextChannel>) channel -> forward(msg, channel)
+                    ).andThen(
+                        channel -> {
+                            // Let player know
+                            msg.getChannel().sendMessageEmbeds(
+                                EmbedUtils.buildEmbed(
+                                    null,
+                                    null,
+                                    "Thank you for your message!",
+                                    Color.GREEN,
+                                    "The AP Admin team will get back to you as soon as possible!",
+                                    null,
+                                    null,
+                                    null,
+                                    null
+                                )
+                            ).queue(
+                                null,
+                                error -> ModMail.getInstance().error("Failed to send initial message for '" + channel + "'")
+                            );
+
                             // Log message
                             if(!LogUtils.log(u.getId(), "Player", u.getName(), msg.getContentDisplay()))
                                 ModMail.getInstance().error("Failed to log message '" + u + ": " + msg.getContentDisplay() + "'");
@@ -60,27 +81,7 @@ public class DirectMessageListener extends ListenerAdapter {
                                 if (!LogUtils.log(u.getId(), "Player", u.getName(), "Attachment <" + a.getContentType() + ">: " + a.getUrl()))
                                     ModMail.getInstance().error("Failed to log attachment '" + u + ": " + a.getUrl() + "'");
                             }
-
-                            // Forward message
-                            forward(msg, channel);
                         }
-                    ).andThen(
-                        channel -> msg.getChannel().sendMessageEmbeds(
-                            EmbedUtils.buildEmbed(
-                                null,
-                                null,
-                                "Thank you for your message!",
-                                Color.GREEN,
-                                "The AP Admin team will get back to you as soon as possible!",
-                                null,
-                                null,
-                                null,
-                                null
-                            )
-                        ).queue(
-                            null,
-                            error -> ModMail.getInstance().error("Failed to send initial message for '" + channel + "'")
-                        )
                     )
                 );
             }
