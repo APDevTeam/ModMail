@@ -4,6 +4,7 @@ import io.github.apdevteam.config.Settings;
 import io.github.apdevteam.listener.CommandListener;
 import io.github.apdevteam.listener.DirectMessageListener;
 import io.github.apdevteam.utils.EmbedUtils;
+import io.github.apdevteam.utils.LogUtils;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.*;
@@ -17,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.security.auth.login.LoginException;
 import java.awt.*;
+import java.io.File;
 import java.time.OffsetDateTime;
 import java.util.function.Consumer;
 
@@ -176,6 +178,15 @@ public class ModMail {
             System.err.println("Failed to find archive channel!");
             return;
         }
+
+        File modmailFolder = new File(".", LogUtils.folder);
+        if(!modmailFolder.exists())
+            if(!modmailFolder.mkdirs())
+                System.err.println("Failed to create modmail folder!");
+        if(!modmailFolder.isDirectory())
+            System.err.println("Failed to create modmail folder!");
+        if(!modmailFolder.exists())
+            System.err.println("Failed to create modmail folder!");
 
         jda.addEventListener(new DirectMessageListener());
         jda.addEventListener(new CommandListener());
