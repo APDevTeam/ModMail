@@ -27,14 +27,15 @@ public class LogUtils {
         return true;
     }
 
-    public static boolean log(@NotNull String userID, @NotNull String username, @NotNull String message) {
+    public static boolean log(@NotNull String userID, @NotNull String prefix, @NotNull String username, @NotNull String message) {
         File f = new File(".", folder + "/" + userID + "." + extension);
         if(!f.exists() || !f.canRead() || !f.canWrite() || f.isDirectory())
             return false;
 
         try {
             BufferedWriter buffer = new BufferedWriter(new FileWriter(f, true));
-            buffer.write(new SimpleDateFormat("[MM/dd/yyyy HH:mm:ss] ").format(new Date()));
+            buffer.write(prefix);
+            buffer.write(new SimpleDateFormat("\t[MM/dd/yyyy HH:mm:ss] ").format(new Date()));
             buffer.write(username);
             buffer.write(": ");
             buffer.write(message);

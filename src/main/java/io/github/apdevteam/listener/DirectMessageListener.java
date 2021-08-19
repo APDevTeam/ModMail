@@ -52,7 +52,18 @@ public class DirectMessageListener extends ListenerAdapter {
                     u,
                     msg.getTimeCreated(),
                     (
-                        (Consumer<TextChannel>) channel -> forward(msg, channel)
+                        (Consumer<TextChannel>) channel -> {
+                            // Log message
+                            if(!LogUtils.log(u.getId(), "Player", u.getName(), msg.getContentDisplay()))
+                                ModMail.getInstance().error("Failed to log message '" + u + ": " + msg.getContentDisplay() + "'");
+                            for(Message.Attachment a : msg.getAttachments()) {
+                                if (!LogUtils.log(u.getId(), "Player", u.getName(), "Attachment <" + a.getContentType() + ">: " + a.getUrl()))
+                                    ModMail.getInstance().error("Failed to log attachment '" + u + ": " + a.getUrl() + "'");
+                            }
+
+                            // Forward message
+                            forward(msg, channel);
+                        }
                     ).andThen(
                         channel -> msg.getChannel().sendMessageEmbeds(
                             EmbedUtils.buildEmbed(
@@ -81,10 +92,10 @@ public class DirectMessageListener extends ListenerAdapter {
         }
 
         // Log message
-        if(!LogUtils.log(u.getId(), u.getName(), msg.getContentDisplay()))
+        if(!LogUtils.log(u.getId(), "Player", u.getName(), msg.getContentDisplay()))
             ModMail.getInstance().error("Failed to log message '" + u + ": " + msg.getContentDisplay() + "'");
         for(Message.Attachment a : msg.getAttachments()) {
-            if (!LogUtils.log(u.getId(), u.getName(), "Attachment <" + a.getContentType() + ">: " + a.getUrl()))
+            if (!LogUtils.log(u.getId(), "Player", u.getName(), "Attachment <" + a.getContentType() + ">: " + a.getUrl()))
                 ModMail.getInstance().error("Failed to log attachment '" + u + ": " + a.getUrl() + "'");
         }
 

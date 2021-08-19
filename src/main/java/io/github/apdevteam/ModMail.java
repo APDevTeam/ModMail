@@ -3,6 +3,7 @@ package io.github.apdevteam;
 import io.github.apdevteam.config.Settings;
 import io.github.apdevteam.listener.CommandListener;
 import io.github.apdevteam.listener.DirectMessageListener;
+import io.github.apdevteam.listener.InboxListener;
 import io.github.apdevteam.utils.EmbedUtils;
 import io.github.apdevteam.utils.LogUtils;
 import net.dv8tion.jda.api.JDA;
@@ -188,8 +189,9 @@ public class ModMail {
         if(!modmailFolder.exists())
             System.err.println("Failed to create modmail folder!");
 
-        jda.addEventListener(new DirectMessageListener());
         jda.addEventListener(new CommandListener());
+        jda.addEventListener(new DirectMessageListener());
+        jda.addEventListener(new InboxListener());
 
         instance = this;
         log("Successfully booted!" + (Settings.DEBUG ? "\n        DEBUG ENABLED" : ""), Color.GREEN, true);
