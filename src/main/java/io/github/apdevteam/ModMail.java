@@ -304,7 +304,7 @@ public class ModMail {
             throw new IllegalStateException("JDA is in an invalid state");
 
         // Create log
-        if(!LogUtils.create(user)) {
+        if(!LogUtils.create(user.getId())) {
             ModMail.getInstance().error("Failed to create ModMail log for: '" + user + "'");
             return;
         }
@@ -354,6 +354,7 @@ public class ModMail {
     }
 
     /* TODO:
+        - Add logging of misc messages in the inbox channel
         - Add closing from the player's end
         - Add the ability to add staff teams (with fancy reacts maybe?)
      */

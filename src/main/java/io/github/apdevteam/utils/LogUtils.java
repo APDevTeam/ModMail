@@ -2,7 +2,6 @@ package io.github.apdevteam.utils;
 
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedWriter;
@@ -17,8 +16,8 @@ public class LogUtils {
     public final static String folder = "OpenModMails";
     public final static String extension = "log";
 
-    public static boolean create(@NotNull User u) {
-        File f = new File(".", folder + "/" + u.getId() + "." + extension);
+    public static boolean create(@NotNull String userID) {
+        File f = new File(".", folder + "/" + userID + "." + extension);
         try {
             if(!f.createNewFile())
                 return false;
@@ -28,8 +27,8 @@ public class LogUtils {
         return true;
     }
 
-    public static boolean log(@NotNull User u, @NotNull String username, @NotNull String message) {
-        File f = new File(".", folder + "/" + u.getId() + "." + extension);
+    public static boolean log(@NotNull String userID, @NotNull String username, @NotNull String message) {
+        File f = new File(".", folder + "/" + userID + "." + extension);
         if(!f.exists() || !f.canRead() || !f.canWrite() || f.isDirectory())
             return false;
 
@@ -48,12 +47,12 @@ public class LogUtils {
     }
 
     public static void archive(
-        @NotNull User u,
+        @NotNull String userID,
         @NotNull TextChannel channel,
         @NotNull Consumer<Message> success,
         @NotNull Consumer<Throwable> failure
     ) {
-        File f = new File(".", folder + "/" + u.getId() + "." + extension);
+        File f = new File(".", folder + "/" + userID + "." + extension);
         if(!f.exists() || !f.canRead() || !f.canWrite() || f.isDirectory())
             failure.accept(new Throwable("Does not exist / can't read / can't write / is directory").fillInStackTrace());
 

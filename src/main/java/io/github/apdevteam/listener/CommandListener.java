@@ -179,13 +179,12 @@ public class CommandListener extends ListenerAdapter {
 
         final String content = msg.getContentDisplay().substring(6).trim();
         try {
-            if(!LogUtils.log(u, u.getName(), content))
+            if(!LogUtils.log(u.getId(), "Player", content))
                 ModMail.getInstance().error("Failed to log message '" + u + ": " + msg + "'");
             for(Message.Attachment a : msg.getAttachments()) {
-                if (!LogUtils.log(u, u.getName(), "Attachment <" + a.getContentType() + ">: " + a.getUrl()))
+                if (!LogUtils.log(u.getId(), "Player", "Attachment <" + a.getContentType() + ">: " + a.getUrl()))
                     ModMail.getInstance().error("Failed to log attachment '" + u + ": " + a.getUrl() + "'");
             }
-
 
             ModMail.getInstance().getModMail(
                 u,
@@ -254,7 +253,7 @@ public class CommandListener extends ListenerAdapter {
         }
 
         // Log closing
-        LogUtils.log(u, msg.getAuthor().getName(), "[Closed thread]");
+        LogUtils.log(u.getId(), msg.getAuthor().getName(), "[Closed thread]");
 
         MessageEmbed embed = EmbedUtils.buildEmbed(
             msg.getAuthor().getName(),
@@ -274,7 +273,7 @@ public class CommandListener extends ListenerAdapter {
                 // Inform DM
                 privateChannel -> privateChannel.sendMessageEmbeds(embed).queue(
                     // Archive channel
-                    dm -> LogUtils.archive(u, ModMail.getInstance().getArchiveChannel(),
+                    dm -> LogUtils.archive(u.getId(), ModMail.getInstance().getArchiveChannel(),
                         // Delete channel
                         unused -> inboxChannel.delete().queue(
                             null,
@@ -304,10 +303,6 @@ public class CommandListener extends ListenerAdapter {
             ),
             error -> ModMail.getInstance().error("Failed to inform inbox of close: " + error.getMessage())
         );
-
-
-
-
     }
 
     private void invalidInbox(final @NotNull TextChannel channel, final @NotNull Message msg) {
