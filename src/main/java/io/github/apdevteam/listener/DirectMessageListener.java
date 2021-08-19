@@ -3,6 +3,7 @@ package io.github.apdevteam.listener;
 import io.github.apdevteam.ModMail;
 import io.github.apdevteam.config.Settings;
 import io.github.apdevteam.utils.EmbedUtils;
+import io.github.apdevteam.utils.LogUtils;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -77,6 +78,14 @@ public class DirectMessageListener extends ListenerAdapter {
                 //exception.printStackTrace();
             }
             return;
+        }
+
+        // Log message
+        if(!LogUtils.log(u, u.getName(), msg.getContentDisplay()))
+            ModMail.getInstance().error("Failed to log message '" + u + ": " + msg.getContentDisplay() + "'");
+        for(Message.Attachment a : msg.getAttachments()) {
+            if (!LogUtils.log(u, u.getName(), "Attachment <" + a.getContentType() + ">: " + a.getUrl()))
+                ModMail.getInstance().error("Failed to log attachment '" + u + ": " + a.getUrl() + "'");
         }
 
         // Forward message

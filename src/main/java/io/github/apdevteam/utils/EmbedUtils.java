@@ -49,9 +49,6 @@ public class EmbedUtils {
         @NotNull String footer,
         @NotNull OffsetDateTime timestamp
     ) {
-        if(!LogUtils.log(user, user.getName(), msg))
-            ModMail.getInstance().error("Failed to log message '" + user + ": " + msg + "'");
-
         MessageEmbed embed = EmbedUtils.buildEmbed(
                 user.getName(),
                 user.getAvatarUrl(),
@@ -83,9 +80,6 @@ public class EmbedUtils {
 
         ArrayList<MessageEmbed> embeds = new ArrayList<>();
         for(Message.Attachment a : attachments) {
-            if(!LogUtils.log(user, user.getName(), "Attachment <" + a.getContentType() + ">: " + a.getUrl()))
-                ModMail.getInstance().error("Failed to log attachment '" + user + ": " + a.getUrl() + "'");
-
             embeds.add(formatAttachment(user, a, color, footer, timestamp));
         }
 

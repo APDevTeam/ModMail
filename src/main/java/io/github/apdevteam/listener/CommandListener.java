@@ -177,8 +177,16 @@ public class CommandListener extends ListenerAdapter {
             return;
         }
 
-        final String content = msg.getContentDisplay().substring(6);
+        final String content = msg.getContentDisplay().substring(6).trim();
         try {
+            if(!LogUtils.log(u, u.getName(), content))
+                ModMail.getInstance().error("Failed to log message '" + u + ": " + msg + "'");
+            for(Message.Attachment a : msg.getAttachments()) {
+                if (!LogUtils.log(u, u.getName(), "Attachment <" + a.getContentType() + ">: " + a.getUrl()))
+                    ModMail.getInstance().error("Failed to log attachment '" + u + ": " + a.getUrl() + "'");
+            }
+
+
             ModMail.getInstance().getModMail(
                 u,
                 // Forward text to DM

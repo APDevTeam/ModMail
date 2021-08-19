@@ -303,6 +303,12 @@ public class ModMail {
         if(jda == null || inboxGuild == null || inboxCategory == null)
             throw new IllegalStateException("JDA is in an invalid state");
 
+        // Create log
+        if(!LogUtils.create(user)) {
+            ModMail.getInstance().error("Failed to create ModMail log for: '" + user + "'");
+            return;
+        }
+
         // Create channel
         inboxGuild.createTextChannel(user.getName(), inboxCategory).queue(
             (
