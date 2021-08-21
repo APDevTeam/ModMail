@@ -1,7 +1,8 @@
 package io.github.apdevteam;
 
 import io.github.apdevteam.config.Settings;
-import io.github.apdevteam.listener.CommandListener;
+import io.github.apdevteam.listener.DirectMessageCommandListener;
+import io.github.apdevteam.listener.InboxCommandListener;
 import io.github.apdevteam.listener.DirectMessageListener;
 import io.github.apdevteam.listener.InboxListener;
 import io.github.apdevteam.utils.EmbedUtils;
@@ -189,8 +190,9 @@ public class ModMail {
         if(!modmailFolder.exists())
             System.err.println("Failed to create modmail folder!");
 
-        jda.addEventListener(new CommandListener());
+        jda.addEventListener(new DirectMessageCommandListener());
         jda.addEventListener(new DirectMessageListener());
+        jda.addEventListener(new InboxCommandListener());
         jda.addEventListener(new InboxListener());
 
         instance = this;
@@ -203,7 +205,7 @@ public class ModMail {
 
         log("Shutting down..." + (Settings.DEBUG ? "\n        DEBUG ENABLED" : ""), Color.RED, true);
         try {
-            Thread.sleep(5000);
+            Thread.sleep(3750);
         }
         catch (InterruptedException e) {
             e.printStackTrace();
@@ -356,8 +358,7 @@ public class ModMail {
     }
 
     /* TODO:
-        - Add logging of misc messages in the inbox channel
-        - Add closing from the player's end
         - Add the ability to add staff teams (with fancy reacts maybe?)
+        - Add a replay ability to replay a ModMail to a channel.
      */
 }

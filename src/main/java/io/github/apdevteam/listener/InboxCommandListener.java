@@ -18,7 +18,7 @@ import java.awt.*;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
-public class CommandListener extends ListenerAdapter {
+public class InboxCommandListener extends ListenerAdapter {
     @Override
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent e) {
         final User u = e.getAuthor();
@@ -59,6 +59,7 @@ public class CommandListener extends ListenerAdapter {
         String userID = msg.getContentStripped().substring(1).split(" ")[1];
         final User u;
         try {
+            // TODO: we need a resolver to read these better.  This method merely returns one which can only have .getID run on it.
             u = User.fromId(userID);
         }
         catch (NumberFormatException e) {
@@ -281,7 +282,7 @@ public class CommandListener extends ListenerAdapter {
                         ),
                         // Error logging
                         error -> {
-                            ModMail.getInstance().error("Failed to close modmail of " + u.getId() + ": " + error.getMessage());
+                            ModMail.getInstance().error("Failed to close ModMail of " + u.getId() + ": " + error.getMessage());
                             inboxChannel.sendMessageEmbeds(EmbedUtils.buildEmbed(
                                 null,
                                 null,
@@ -334,13 +335,13 @@ public class CommandListener extends ListenerAdapter {
         try {
             msg.getChannel().sendMessageEmbeds(
                 EmbedUtils.buildEmbed(
-                    null,
-                    null,
+                    msg.getAuthor().getName(),
+                    msg.getAuthor().getAvatarUrl(),
                     "Invalid command",
                     Color.RED,
                     msg.getContentDisplay(),
                     null,
-                    msg.getTimeCreated(),
+                    null,
                     null,
                     null
                 )

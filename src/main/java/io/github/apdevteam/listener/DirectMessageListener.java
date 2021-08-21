@@ -4,12 +4,7 @@ import io.github.apdevteam.ModMail;
 import io.github.apdevteam.config.Settings;
 import io.github.apdevteam.utils.EmbedUtils;
 import io.github.apdevteam.utils.LogUtils;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.PrivateChannel;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -26,11 +21,6 @@ public class DirectMessageListener extends ListenerAdapter {
         if(u.isBot() || u.getId().equals(Settings.TOKEN))
             return;
 
-        final Message msg = e.getMessage();
-        if(Settings.DEBUG)
-            ModMail.getInstance().log("Received `'" + msg.getContentDisplay()
-                    + "' from '" + u.getName() + "#" + u.getDiscriminator() + "'`", Color.YELLOW);
-
         boolean foundGuild = false;
         for(Guild g : u.getMutualGuilds()) {
             String id = g.getId();
@@ -45,6 +35,7 @@ public class DirectMessageListener extends ListenerAdapter {
             return;
         }
 
+        final Message msg = e.getMessage();
         TextChannel modMailInbox = ModMail.getInstance().getModMailInbox(u);
         if(modMailInbox == null) {
             try { // Try creating a channel and forwarding the message
@@ -89,6 +80,12 @@ public class DirectMessageListener extends ListenerAdapter {
                 ModMail.getInstance().error(exception.getMessage());
                 //exception.printStackTrace();
             }
+            return;
+        }
+
+        // Check for commands
+        String content = msg.getContentStripped();
+        if(content.startsWith(Settings.PREFIX)) {
             return;
         }
 

@@ -17,20 +17,22 @@ public class InboxListener extends ListenerAdapter {
             return;
 
         final Message msg = e.getMessage();
+        if (!msg.getGuild().getId().equals(Settings.INBOX_GUILD))
+            return;
+
         String content = msg.getContentStripped();
         if(content.startsWith(Settings.PREFIX))
             return;
 
         final TextChannel inboxChannel = msg.getTextChannel();
         String userID = inboxChannel.getTopic();
-        if(userID == null) {
+        if(userID == null)
             return;
-        }
 
         try {
             User.fromId(userID);
         }
-        catch (NumberFormatException exception) {
+        catch (NumberFormatException ignored) {
             return;
         }
 
