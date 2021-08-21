@@ -180,10 +180,10 @@ public class InboxCommandListener extends ListenerAdapter {
 
         final String content = msg.getContentDisplay().substring(6).trim();
         try {
-            if(!LogUtils.log(u.getId(), "Reply", msg.getAuthor().getName(), content))
+            if(!LogUtils.log(u.getId(), "Reply", msg.getAuthor().getName(), msg.getAuthor().getId(), content))
                 ModMail.getInstance().error("Failed to log message '" + u + ": " + msg + "'");
             for(Message.Attachment a : msg.getAttachments()) {
-                if (!LogUtils.log(u.getId(), "Reply", msg.getAuthor().getName(), "Attachment <" + a.getContentType() + ">: " + a.getUrl()))
+                if (!LogUtils.log(u.getId(), "Reply", msg.getAuthor().getName(), msg.getAuthor().getId(), "Attachment <" + a.getContentType() + ">: " + a.getUrl()))
                     ModMail.getInstance().error("Failed to log attachment '" + u + ": " + a.getUrl() + "'");
             }
 
@@ -254,7 +254,7 @@ public class InboxCommandListener extends ListenerAdapter {
         }
 
         // Log closing
-        LogUtils.log(u.getId(), "Staff", msg.getAuthor().getName(), "[Closed thread]");
+        LogUtils.log(u.getId(), "Staff", msg.getAuthor().getName(), msg.getAuthor().getId(), "[Closed thread]");
 
         MessageEmbed embed = EmbedUtils.buildEmbed(
             msg.getAuthor().getName(),

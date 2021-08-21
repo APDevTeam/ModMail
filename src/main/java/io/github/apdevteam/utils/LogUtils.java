@@ -16,8 +16,8 @@ public class LogUtils {
     public final static String folder = "OpenModMails";
     public final static String extension = "log";
 
-    public static boolean create(@NotNull String userID) {
-        File f = new File(".", folder + "/" + userID + "." + extension);
+    public static boolean create(@NotNull String logID) {
+        File f = new File(".", folder + "/" + logID + "." + extension);
         try {
             if(!f.createNewFile())
                 return false;
@@ -27,8 +27,8 @@ public class LogUtils {
         return true;
     }
 
-    public static boolean log(@NotNull String userID, @NotNull String prefix, @NotNull String username, @NotNull String message) {
-        File f = new File(".", folder + "/" + userID + "." + extension);
+    public static boolean log(@NotNull String logID, @NotNull String prefix, @NotNull String username, @NotNull String userID, @NotNull String message) {
+        File f = new File(".", folder + "/" + logID + "." + extension);
         if(!f.exists() || !f.canRead() || !f.canWrite() || f.isDirectory())
             return false;
 
@@ -37,7 +37,9 @@ public class LogUtils {
             buffer.write(prefix);
             buffer.write(new SimpleDateFormat("\t[MM/dd/yyyy HH:mm:ss] ").format(new Date()));
             buffer.write(username);
-            buffer.write(": ");
+            buffer.write(" <");
+            buffer.write(userID);
+            buffer.write(">: ");
             buffer.write(message);
             buffer.write("\n");
             buffer.close();
@@ -48,16 +50,16 @@ public class LogUtils {
     }
 
     public static void archive(
-        @NotNull String userID,
+        @NotNull String logID,
         @NotNull TextChannel channel,
         @NotNull Consumer<Message> success,
         @NotNull Consumer<Throwable> failure
     ) {
-        File f = new File(".", folder + "/" + userID + "." + extension);
+        File f = new File(".", folder + "/" + logID + "." + extension);
         if(!f.exists() || !f.canRead() || !f.canWrite() || f.isDirectory())
             failure.accept(new Throwable("Does not exist / can't read / can't write / is directory").fillInStackTrace());
 
-        channel.sendMessage(userID).addFile(f).queue(
+        channel.sendMessage(logID).addFile(f).queue(
             ((Consumer<Message>) message -> {
                 if (!f.delete())
                     failure.accept(new Throwable("Failed to delete file").fillInStackTrace());

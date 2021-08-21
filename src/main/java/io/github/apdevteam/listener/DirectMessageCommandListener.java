@@ -159,7 +159,7 @@ public class DirectMessageCommandListener extends ListenerAdapter {
         }
 
         // Log closing
-        LogUtils.log(u.getId(), "User", msg.getAuthor().getName(), "[Closed thread]");
+        LogUtils.log(u.getId(), "User", msg.getAuthor().getName(), msg.getAuthor().getId(), "[Closed thread]");
 
         MessageEmbed embed = EmbedUtils.buildEmbed(
                 u.getName(),

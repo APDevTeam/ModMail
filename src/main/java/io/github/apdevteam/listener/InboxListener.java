@@ -37,6 +37,6 @@ public class InboxListener extends ListenerAdapter {
         }
 
         // We are in an inbox of user 'player'
-        LogUtils.log(userID, "Comment", u.getName(), msg.getContentDisplay());
+        LogUtils.log(userID, "Comment", u.getName(), u.getId(), msg.getContentDisplay());
     }
 }

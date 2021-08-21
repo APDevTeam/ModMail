@@ -66,10 +66,10 @@ public class DirectMessageListener extends ListenerAdapter {
                             );
 
                             // Log message
-                            if(!LogUtils.log(u.getId(), "Player", u.getName(), msg.getContentDisplay()))
+                            if(!LogUtils.log(u.getId(), "Player", u.getName(), u.getId(), msg.getContentDisplay()))
                                 ModMail.getInstance().error("Failed to log message '" + u + ": " + msg.getContentDisplay() + "'");
                             for(Message.Attachment a : msg.getAttachments()) {
-                                if (!LogUtils.log(u.getId(), "Player", u.getName(), "Attachment <" + a.getContentType() + ">: " + a.getUrl()))
+                                if (!LogUtils.log(u.getId(), "Player", u.getName(), u.getId(), "Attachment <" + a.getContentType() + ">: " + a.getUrl()))
                                     ModMail.getInstance().error("Failed to log attachment '" + u + ": " + a.getUrl() + "'");
                             }
                         }
@@ -90,10 +90,10 @@ public class DirectMessageListener extends ListenerAdapter {
         }
 
         // Log message
-        if(!LogUtils.log(u.getId(), "Player", u.getName(), msg.getContentDisplay()))
+        if(!LogUtils.log(u.getId(), "Player", u.getName(), u.getId(), msg.getContentDisplay()))
             ModMail.getInstance().error("Failed to log message '" + u + ": " + msg.getContentDisplay() + "'");
         for(Message.Attachment a : msg.getAttachments()) {
-            if (!LogUtils.log(u.getId(), "Player", u.getName(), "Attachment <" + a.getContentType() + ">: " + a.getUrl()))
+            if (!LogUtils.log(u.getId(), "Player", u.getName(), u.getId(), "Attachment <" + a.getContentType() + ">: " + a.getUrl()))
                 ModMail.getInstance().error("Failed to log attachment '" + u + ": " + a.getUrl() + "'");
         }
 
