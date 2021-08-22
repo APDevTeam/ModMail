@@ -79,19 +79,19 @@ public class DirectMessageCommandListener extends ListenerAdapter {
 
     private void invite(final @NotNull PrivateChannel channel, final @NotNull User author) {
         final MessageEmbed embed = EmbedUtils.buildEmbed(
-                null,
-                null,
-                "Please join our discord server!",
-                Color.RED,
-                Settings.MAIN_INVITE,
-                null,
-                null,
-                null,
-                null
+            null,
+            null,
+            "Please join our discord server!",
+            Color.RED,
+            Settings.MAIN_INVITE,
+            null,
+            null,
+            null,
+            null
         );
         channel.sendMessageEmbeds(embed).queue(
-                null,
-                error -> ModMail.getInstance().error("Failed to send invite embed '" + embed + "' to '" + author + "'")
+            null,
+            error -> ModMail.getInstance().error("Failed to send invite embed '" + embed + "' to '" + author + "'")
         );
     }
 
@@ -121,18 +121,18 @@ public class DirectMessageCommandListener extends ListenerAdapter {
 
     private void add(final @NotNull Message msg) {
         msg.getChannel().sendMessageEmbeds(EmbedUtils.buildEmbed(
-                null,
-                null,
-                null,
-                Color.RED,
-                "Adding is not yet supported",
-                null,
-                null,
-                null,
-                null
+            null,
+            null,
+            null,
+            Color.RED,
+            "Adding is not yet supported",
+            null,
+            null,
+            null,
+            null
         )).queue(
-                null,
-                error -> ModMail.getInstance().error("Failed to send add warning: " + error.getMessage())
+            null,
+            error -> ModMail.getInstance().error("Failed to send add warning: " + error.getMessage())
         );
     }
 
@@ -142,18 +142,18 @@ public class DirectMessageCommandListener extends ListenerAdapter {
         MessageChannel privateChannel = msg.getPrivateChannel();
         if(inboxChannel == null) {
             msg.getChannel().sendMessageEmbeds(EmbedUtils.buildEmbed(
-                    null,
-                    null,
-                    null,
-                    Color.RED,
-                    "Failed to close",
-                    null,
-                    null,
-                    null,
-                    null
+                null,
+                null,
+                null,
+                Color.RED,
+                "Failed to close",
+                null,
+                null,
+                null,
+                null
             )).queue(
-                    null,
-                    error -> ModMail.getInstance().error("Failed to send close warning: " + error.getMessage())
+                null,
+                error -> ModMail.getInstance().error("Failed to send close warning: " + error.getMessage())
             );
             return;
         }
@@ -162,49 +162,49 @@ public class DirectMessageCommandListener extends ListenerAdapter {
         LogUtils.log(u.getId(), "Player", msg.getAuthor().getName(), msg.getAuthor().getId(), "[Closed thread]");
 
         MessageEmbed embed = EmbedUtils.buildEmbed(
-                u.getName(),
-                u.getAvatarUrl(),
-                "Thread Closed",
-                Color.RED,
-                null,
-                "Staff",
-                msg.getTimeCreated(),
-                null,
-                null
+            u.getName(),
+            u.getAvatarUrl(),
+            "Thread Closed",
+            Color.RED,
+            null,
+            "Staff",
+            msg.getTimeCreated(),
+            null,
+            null
         );
         // Inform inbox
         inboxChannel.sendMessageEmbeds(embed).queue(
-                // Inform DM
-                unused -> privateChannel.sendMessageEmbeds(embed).queue(
-                        // Archive channel
-                        dm -> LogUtils.archive(u.getId(), ModMail.getInstance().getArchiveChannel(),
-                                // Delete channel
-                                unused2 -> inboxChannel.delete().queue(
-                                        null,
-                                        error -> ModMail.getInstance().error("Failed to delete channel: " + error.getMessage())
-                                ),
-                                // Error logging
-                                error -> {
-                                    ModMail.getInstance().error("Failed to close ModMail of " + u.getId() + ": " + error.getMessage());
-                                    privateChannel.sendMessageEmbeds(EmbedUtils.buildEmbed(
-                                            null,
-                                            null,
-                                            "Failed to close channel.",
-                                            Color.RED,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null
-                                    )).queue(
-                                            null,
-                                            bad -> ModMail.getInstance().error("Failed to inform inbox of close failure: " + bad.getMessage())
-                                    );
-                                }
-                        ),
-                        error -> ModMail.getInstance().error("Failed to inform DM of close: " + error.getMessage())
+            // Inform DM
+            unused -> privateChannel.sendMessageEmbeds(embed).queue(
+                // Archive channel
+                dm -> LogUtils.archive(u.getId(), ModMail.getInstance().getArchiveChannel(),
+                    // Delete channel
+                    unused2 -> inboxChannel.delete().queue(
+                        null,
+                        error -> ModMail.getInstance().error("Failed to delete channel: " + error.getMessage())
+                    ),
+                    // Error logging
+                    error -> {
+                        ModMail.getInstance().error("Failed to close ModMail of " + u.getId() + ": " + error.getMessage());
+                        privateChannel.sendMessageEmbeds(EmbedUtils.buildEmbed(
+                            null,
+                            null,
+                            "Failed to close channel.",
+                            Color.RED,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null
+                        )).queue(
+                            null,
+                            bad -> ModMail.getInstance().error("Failed to inform inbox of close failure: " + bad.getMessage())
+                        );
+                    }
                 ),
-                error -> ModMail.getInstance().error("Failed to inform inbox of close: " + error.getMessage())
+                error -> ModMail.getInstance().error("Failed to inform DM of close: " + error.getMessage())
+            ),
+            error -> ModMail.getInstance().error("Failed to inform inbox of close: " + error.getMessage())
         );
     }
 }
