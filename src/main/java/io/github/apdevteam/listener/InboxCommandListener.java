@@ -57,13 +57,81 @@ public class InboxCommandListener extends ListenerAdapter {
 
     private void open(final @NotNull Message msg) {
         String userID = msg.getContentStripped().substring(1).split(" ")[1];
-        final User u;
-        try {
-            // TODO: we need a resolver to read these better.  This method merely returns one which can only have .getID run on it.
-            u = User.fromId(userID);
-        }
-        catch (NumberFormatException e) {
-            msg.getChannel().sendMessageEmbeds(EmbedUtils.buildEmbed(
+
+        ModMail.getInstance().getUserbyID(
+            userID,
+            u -> {
+                TextChannel textChannel = ModMail.getInstance().getModMailInbox(u);
+                if (textChannel != null) {
+                    try {
+                        textChannel.sendMessageEmbeds(EmbedUtils.buildEmbed(
+                            null,
+                            null,
+                            "This user already has a ModMail channel.",
+                            Color.RED,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null
+                        )).queue(
+                            message -> msg.delete().queue(
+                                null,
+                                error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage())
+                            ),
+                            error -> ModMail.getInstance().error("Failed to send open ModMail warning: " + error.getMessage())
+                        );
+                    }
+                    catch (InsufficientPermissionException error) {
+                        ModMail.getInstance().error("Failed to delete message: " + error.getMessage());
+                    }
+                    return;
+                }
+
+                final User author = msg.getAuthor();
+
+                // Create ModMail
+                try {
+                    ModMail.getInstance().createModMail(
+                        u,
+                        msg.getTimeCreated(),
+                        channel -> ModMail.getInstance().getModMail(
+                            u,
+                            privateChannel -> {
+                                // Log message
+                                if(!LogUtils.log(u.getId(), "Staff", author.getName(), author.getId(), "[Opened thread]]"))
+                                    ModMail.getInstance().error("Failed to log message '" + u + ": " + msg.getContentDisplay() + "'");
+
+                                // Inform player
+                                privateChannel.sendMessageEmbeds(
+                                    EmbedUtils.buildEmbed(
+                                        author.getName(),
+                                        author.getAvatarUrl(),
+                                        null,
+                                        Color.YELLOW,
+                                        "Opened a ModMail session.",
+                                        null,
+                                        null,
+                                        null,
+                                        null
+                                    )
+                                ).queue(
+                                    // Delete command
+                                    message -> msg.delete().queue(
+                                        null,
+                                        error -> ModMail.getInstance().error("Failed to delete open command: " + error.getMessage())
+                                    ),
+                                    error -> ModMail.getInstance().error("Failed to send open ModMail message: " + error.getMessage())
+                                );
+                            }
+                        )
+                    );
+                }
+                catch (InsufficientPermissionException error) {
+                    ModMail.getInstance().error("Failed to delete message: " + error.getMessage());
+                }
+            },
+            ignored -> msg.getChannel().sendMessageEmbeds(EmbedUtils.buildEmbed(
                 null,
                 null,
                 "Invalid User ID",
@@ -76,71 +144,8 @@ public class InboxCommandListener extends ListenerAdapter {
             )).queue(
                 null,
                 error -> ModMail.getInstance().error("Failed warn invalid ID: " + error.getMessage())
-            );
-            return;
-        }
-
-        TextChannel textChannel = ModMail.getInstance().getModMailInbox(u);
-        if (textChannel != null) {
-            try {
-                textChannel.sendMessageEmbeds(EmbedUtils.buildEmbed(
-                    null,
-                    null,
-                    "This user already has a ModMail channel.",
-                    Color.RED,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null
-                )).queue(
-                    message -> msg.delete().queue(
-                        null,
-                        error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage())
-                    ),
-                    error -> ModMail.getInstance().error("Failed to send open ModMail warning: " + error.getMessage())
-                );
-            }
-            catch (InsufficientPermissionException error) {
-                ModMail.getInstance().error("Failed to delete message: " + error.getMessage());
-            }
-            return;
-        }
-
-        // Create ModMail
-        try {
-            ModMail.getInstance().createModMail(
-                u,
-                msg.getTimeCreated(),
-                channel -> ModMail.getInstance().getModMail(
-                    u,
-                    // Inform player
-                    privateChannel -> privateChannel.sendMessageEmbeds(
-                        EmbedUtils.buildEmbed(
-                            msg.getAuthor().getName(),
-                            msg.getAuthor().getAvatarUrl(),
-                            null,
-                            Color.YELLOW,
-                            "Opened a ModMail session.",
-                            null,
-                            null,
-                            null,
-                            null
-                        )
-                    ).queue(
-                        // Delete command
-                        message -> msg.delete().queue(
-                            null,
-                            error -> ModMail.getInstance().error("Failed to delete open command: " + error.getMessage())
-                        ),
-                        error -> ModMail.getInstance().error("Failed to send open ModMail message: " + error.getMessage())
-                    )
-                )
-            );
-        }
-        catch (InsufficientPermissionException error) {
-            ModMail.getInstance().error("Failed to delete message: " + error.getMessage());
-        }
+            )
+        );
     }
 
     private void reply(final @NotNull Message msg) {
@@ -151,12 +156,75 @@ public class InboxCommandListener extends ListenerAdapter {
             return;
         }
 
-        final User u;
-        try {
-            u = User.fromId(userID);
-        }
-        catch (NumberFormatException e) {
-            msg.getChannel().sendMessageEmbeds(EmbedUtils.buildEmbed(
+        ModMail.getInstance().getUserbyID(
+            userID,
+            u -> {
+                if (!u.getId().equals(inboxChannel.getTopic())) {
+                    invalidInbox(inboxChannel, msg);
+                    return;
+                }
+
+                final String content = msg.getContentDisplay().substring(6).trim();
+                try {
+                    if(!LogUtils.log(u.getId(), "Reply", msg.getAuthor().getName(), msg.getAuthor().getId(), content))
+                        ModMail.getInstance().error("Failed to log message '" + u + ": " + msg + "'");
+                    for(Message.Attachment a : msg.getAttachments()) {
+                        if (!LogUtils.log(u.getId(), "Reply", msg.getAuthor().getName(), msg.getAuthor().getId(), "Attachment <" + a.getContentType() + ">: " + a.getUrl()))
+                            ModMail.getInstance().error("Failed to log attachment '" + u + ": " + a.getUrl() + "'");
+                    }
+
+                    ModMail.getInstance().getModMail(
+                        u,
+                        // Forward text to DM
+                        (
+                            (Consumer<PrivateChannel>) privateChannel -> EmbedUtils.forwardText(
+                                msg.getAuthor(),
+                                content,
+                                privateChannel,
+                                Color.GREEN,
+                                null,
+                                "Staff",
+                                msg.getTimeCreated()
+                            )
+                        // Forward text to inbox
+                        ).andThen(
+                            (
+                                (Consumer<PrivateChannel>) privateChannel -> EmbedUtils.forwardText(
+                                    msg.getAuthor(),
+                                    content,
+                                    inboxChannel,
+                                    Color.GREEN,
+                                    null,
+                                    "Staff",
+                                    msg.getTimeCreated()
+                                )
+                            // Forward attachments to DM & inbox
+                            ).andThen(
+                                (
+                                    (Consumer<PrivateChannel>) privateChannel -> EmbedUtils.forwardAttachments(
+                                        msg.getAuthor(),
+                                        Arrays.asList(privateChannel, inboxChannel),
+                                        msg.getAttachments(),
+                                        Color.GREEN,
+                                        "Staff",
+                                        msg.getTimeCreated()
+                                    )
+                                // Delete message
+                                ).andThen(
+                                    privateChannel -> msg.delete().queue(
+                                        null,
+                                        error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage())
+                                    )
+                                )
+                            )
+                        )
+                    );
+                }
+                catch (InsufficientPermissionException error) {
+                    ModMail.getInstance().error("Failed to delete: " + error.getMessage());
+                }
+            },
+            ignored -> msg.getChannel().sendMessageEmbeds(EmbedUtils.buildEmbed(
                 null,
                 null,
                 "Invalid User ID",
@@ -169,74 +237,8 @@ public class InboxCommandListener extends ListenerAdapter {
             )).queue(
                 null,
                 error -> ModMail.getInstance().error("Failed warn invalid ID: " + error.getMessage())
-            );
-            return;
-        }
-
-        if (!u.getId().equals(inboxChannel.getTopic())) {
-            invalidInbox(inboxChannel, msg);
-            return;
-        }
-
-        final String content = msg.getContentDisplay().substring(6).trim();
-        try {
-            if(!LogUtils.log(u.getId(), "Reply", msg.getAuthor().getName(), msg.getAuthor().getId(), content))
-                ModMail.getInstance().error("Failed to log message '" + u + ": " + msg + "'");
-            for(Message.Attachment a : msg.getAttachments()) {
-                if (!LogUtils.log(u.getId(), "Reply", msg.getAuthor().getName(), msg.getAuthor().getId(), "Attachment <" + a.getContentType() + ">: " + a.getUrl()))
-                    ModMail.getInstance().error("Failed to log attachment '" + u + ": " + a.getUrl() + "'");
-            }
-
-            ModMail.getInstance().getModMail(
-                u,
-                // Forward text to DM
-                (
-                    (Consumer<PrivateChannel>) privateChannel -> EmbedUtils.forwardText(
-                        msg.getAuthor(),
-                        content,
-                        privateChannel,
-                        Color.GREEN,
-                        null,
-                        "Staff",
-                        msg.getTimeCreated()
-                    )
-                // Forward text to inbox
-                ).andThen(
-                    (
-                        (Consumer<PrivateChannel>) privateChannel -> EmbedUtils.forwardText(
-                            msg.getAuthor(),
-                            content,
-                            inboxChannel,
-                            Color.GREEN,
-                            null,
-                            "Staff",
-                            msg.getTimeCreated()
-                        )
-                    // Forward attachments to DM & inbox
-                    ).andThen(
-                        (
-                            (Consumer<PrivateChannel>) privateChannel -> EmbedUtils.forwardAttachments(
-                                msg.getAuthor(),
-                                Arrays.asList(privateChannel, inboxChannel),
-                                msg.getAttachments(),
-                                Color.GREEN,
-                                "Staff",
-                                msg.getTimeCreated()
-                            )
-                        // Delete message
-                        ).andThen(
-                            privateChannel -> msg.delete().queue(
-                                null,
-                                error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage())
-                            )
-                        )
-                    )
-                )
-            );
-        }
-        catch (InsufficientPermissionException error) {
-            ModMail.getInstance().error("Failed to delete: " + error.getMessage());
-        }
+            )
+        );
     }
 
     private void close(final @NotNull Message msg) {
@@ -247,62 +249,67 @@ public class InboxCommandListener extends ListenerAdapter {
             return;
         }
 
-        final User u = User.fromId(userID);
-        if (!u.getId().equals(inboxChannel.getTopic())) {
-            invalidInbox(inboxChannel, msg);
-            return;
-        }
+        ModMail.getInstance().getUserbyID(
+            userID,
+            u -> {
+                if (!u.getId().equals(inboxChannel.getTopic())) {
+                    invalidInbox(inboxChannel, msg);
+                    return;
+                }
 
-        // Log closing
-        LogUtils.log(u.getId(), "Staff", msg.getAuthor().getName(), msg.getAuthor().getId(), "[Closed thread]");
+                // Log closing
+                LogUtils.log(u.getId(), "Staff", msg.getAuthor().getName(), msg.getAuthor().getId(), "[Closed thread]");
 
-        MessageEmbed embed = EmbedUtils.buildEmbed(
-            msg.getAuthor().getName(),
-            msg.getAuthor().getAvatarUrl(),
-            "Thread Closed",
-            Color.RED,
-            null,
-            "Staff",
-            msg.getTimeCreated(),
-            null,
-            null
-        );
-        // Inform inbox
-        inboxChannel.sendMessageEmbeds(embed).queue(
-            message -> ModMail.getInstance().getModMail(
-                u,
-                // Inform DM
-                privateChannel -> privateChannel.sendMessageEmbeds(embed).queue(
-                    // Archive channel
-                    dm -> LogUtils.archive(u.getId(), ModMail.getInstance().getArchiveChannel(),
-                        // Delete channel
-                        unused -> inboxChannel.delete().queue(
-                            null,
-                            error -> ModMail.getInstance().error("Failed to delete channel: " + error.getMessage())
-                        ),
-                        // Error logging
-                        error -> {
-                            ModMail.getInstance().error("Failed to close ModMail of " + u.getId() + ": " + error.getMessage());
-                            inboxChannel.sendMessageEmbeds(EmbedUtils.buildEmbed(
-                                null,
-                                null,
-                                "Failed to close channel.",
-                                Color.RED,
-                                null,
-                                null,
-                                null,
-                                null,
-                                null
-                            )).queue(
-                                null,
-                                bad -> ModMail.getInstance().error("Failed to inform inbox of close failure: " + bad.getMessage())
-                            );
-                        }
+                MessageEmbed embed = EmbedUtils.buildEmbed(
+                    msg.getAuthor().getName(),
+                    msg.getAuthor().getAvatarUrl(),
+                    "Thread Closed",
+                    Color.RED,
+                    null,
+                    "Staff",
+                    msg.getTimeCreated(),
+                    null,
+                    null
+                );
+                // Inform inbox
+                inboxChannel.sendMessageEmbeds(embed).queue(
+                    message -> ModMail.getInstance().getModMail(
+                        u,
+                        // Inform DM
+                        privateChannel -> privateChannel.sendMessageEmbeds(embed).queue(
+                            // Archive channel
+                            dm -> LogUtils.archive(u.getId(), ModMail.getInstance().getArchiveChannel(),
+                                // Delete channel
+                                unused -> inboxChannel.delete().queue(
+                                    null,
+                                    error -> ModMail.getInstance().error("Failed to delete channel: " + error.getMessage())
+                                ),
+                                // Error logging
+                                error1 -> {
+                                    ModMail.getInstance().error("Failed to close ModMail of " + u.getId() + ": " + error1.getMessage());
+                                    inboxChannel.sendMessageEmbeds(EmbedUtils.buildEmbed(
+                                        null,
+                                        null,
+                                        "Failed to close channel.",
+                                        Color.RED,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null
+                                    )).queue(
+                                        null,
+                                        error2 -> ModMail.getInstance().error("Failed to inform inbox of close failure: " + error2.getMessage())
+                                    );
+                                }
+                            ),
+                            error -> ModMail.getInstance().error("Failed to inform DM of close: " + error.getMessage())
+                        )
                     ),
-                    error -> ModMail.getInstance().error("Failed to inform DM of close: " + error.getMessage())
-                )
-            ),
-            error -> ModMail.getInstance().error("Failed to inform inbox of close: " + error.getMessage())
+                    error -> ModMail.getInstance().error("Failed to inform inbox of close: " + error.getMessage())
+                );
+            },
+            error -> ModMail.getInstance().error("Failed to get user for close: " + error.getMessage())
         );
     }
 

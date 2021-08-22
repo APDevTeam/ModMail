@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.utils.MiscUtil;
 import org.jetbrains.annotations.NotNull;
 
 public class InboxListener extends ListenerAdapter {
@@ -30,7 +31,7 @@ public class InboxListener extends ListenerAdapter {
             return;
 
         try {
-            User.fromId(userID);
+            MiscUtil.parseSnowflake(userID);
         }
         catch (NumberFormatException ignored) {
             return;

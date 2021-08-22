@@ -288,13 +288,23 @@ public class ModMail {
         return null;
     }
 
-    public void getModMail(@NotNull User user, @Nullable Consumer<PrivateChannel> callback) {
+    public void getModMail(@NotNull User user, @NotNull Consumer<PrivateChannel> callback) {
         if(jda == null)
             throw new IllegalStateException("JDA is in an invalid state");
 
         jda.openPrivateChannelById(user.getId()).queue(
             callback,
             error -> ModMail.getInstance().error("Failed to get ModMail for: '" + user.getName() + "#" + user.getDiscriminator() + "'")
+        );
+    }
+
+    public void getUserbyID(@NotNull String userID, @NotNull Consumer<User> success, @Nullable Consumer<Throwable> failure) {
+        if(jda == null)
+            throw new IllegalStateException("JDA is in an invalid state");
+
+        jda.retrieveUserById(userID).queue(
+            success,
+            failure
         );
     }
 
@@ -359,6 +369,6 @@ public class ModMail {
 
     /* TODO:
         - Add the ability to add staff teams (with fancy reacts maybe?)
-        - Add a replay ability to replay a ModMail to a channel.
+        - Add a replay ability to replay a ModMail to a channel?
      */
 }
