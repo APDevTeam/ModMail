@@ -1,0 +1,18 @@
+Debug = false
+Prefix = "%"
+Token = ""
+
+[Inbox]
+Guild = ""
+Category = ""
+Log = ""
+Archive = ""
+
+[Main]
+Guild = ""
+Invite = ""
+
+[Teams]
+ShortNames = ["Admin", "Dev", "RP", "APEX", "Build", "YT"]
+LongNames = ["Admin", "Developer", "Roleplay", "Expansion", "Build", "YouTube"]
+Emoji = [] # TODO

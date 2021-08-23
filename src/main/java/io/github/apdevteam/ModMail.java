@@ -1,5 +1,8 @@
 package io.github.apdevteam;
 
+import com.electronwill.nightconfig.core.ConfigSpec;
+import com.electronwill.nightconfig.core.file.FileConfig;
+import com.electronwill.nightconfig.core.file.FileConfigBuilder;
 import io.github.apdevteam.config.Settings;
 import io.github.apdevteam.listener.DirectMessageCommandListener;
 import io.github.apdevteam.listener.InboxCommandListener;
@@ -14,6 +17,7 @@ import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
+import net.dv8tion.jda.api.utils.MiscUtil;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,7 +26,9 @@ import javax.security.auth.login.LoginException;
 import java.awt.*;
 import java.io.File;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class ModMail {
     private static ModMail instance = null;
@@ -33,40 +39,58 @@ public class ModMail {
     }
 
     public static void main(String @NotNull [] args) {
-        for(String arg : args) {
-            if(arg.startsWith("-token=")) { // Required
-                Settings.TOKEN = arg.split("=")[1];
+        ConfigSpec spec = new ConfigSpec();
+        spec.define("Debug", false);
+        spec.define("Token", "", Settings.snowflakeValidator());
+        spec.define("Prefix", "%", Settings.prefixValidator());
+        spec.define("Inbox.Guild", "", Settings.snowflakeValidator());
+        spec.define("Inbox.Category", "", Settings.snowflakeValidator());
+        spec.define("Inbox.Log", "", Settings.snowflakeValidator());
+        spec.define("Inbox.Archive", "", Settings.snowflakeValidator());
+        spec.define("Main.Guild", "", Settings.snowflakeValidator());
+        spec.define("Main.Invite", "", Settings.snowflakeValidator());
+
+
+        // Load config
+        File configFile = new File("config.toml");
+        FileConfigBuilder builder = FileConfig.builder(configFile);
+        FileConfig config = builder.defaultResource("/config.toml").sync().build();
+        config.load();
+
+
+        // Check config
+        spec.correct(config, (correctionAction, path, from, to) -> {
+            String s = " config value '" + String.join(".", path) + "' from '" + from + "' to '" + to + "'";
+            switch(correctionAction) {
+                case ADD:
+                    System.err.println("Added" + s);
+                case REMOVE:
+                    System.err.println("Removed" + s);
+                case REPLACE:
+                default:
+                    System.err.println("Corrected" + s);
             }
-            else if(arg.startsWith("-inbox=")) { // Required
-                Settings.INBOX_GUILD = arg.split("=")[1];
-            }
-            else if(arg.startsWith("-category=")) { // Required
-                Settings.INBOX_CATEGORY = arg.split("=")[1];
-            }
-            else if(arg.startsWith("-main=")) { // Required
-                Settings.MAIN_GUILD = arg.split("=")[1];
-            }
-            else if(arg.startsWith("-invite=")) { // Required
-                Settings.MAIN_INVITE = arg.split("=")[1];
-            }
-            else if(arg.startsWith("-log=")) { // Required
-                Settings.LOG_CHANNEL = arg.split("=")[1];
-            }
-            else if(arg.startsWith("-archive=")) { // Required
-                Settings.ARCHIVE_CHANNEL = arg.split("=")[1];
-            }
-            else if(arg.startsWith("-prefix=")) { // Optional
-                Settings.PREFIX = arg.split("=")[1];
-            }
-            else if(arg.startsWith("-debug")) { // Optional
-                Settings.DEBUG = true;
-            }
-        }
+        });
+
+
+        // Load into Settings
+        Settings.DEBUG = config.getOrElse("Debug", false);
+        Settings.TOKEN = config.getOrElse("Token", "");
+        Settings.PREFIX = config.getOrElse("Prefix", "%");
+
+        Settings.INBOX_GUILD = config.getOrElse("Inbox.Guild", "");
+        Settings.INBOX_DEFAULT_CATEGORY = config.getOrElse("Inbox.Category", "");
+        Settings.INBOX_LOG_CHANNEL = config.getOrElse("Inbox.Log", "");
+        Settings.INBOX_ARCHIVE_CHANNEL = config.getOrElse("Inbox.Archive", "");
+
+        Settings.MAIN_GUILD = config.getOrElse("Main.Guild", "");
+        Settings.MAIN_INVITE = config.getOrElse("Main.Invite", "");
+
 
         if("".equals(Settings.TOKEN) || "".equals(Settings.PREFIX)
-            || "".equals(Settings.INBOX_GUILD) || "".equals(Settings.INBOX_CATEGORY)
+            || "".equals(Settings.INBOX_GUILD) || "".equals(Settings.INBOX_DEFAULT_CATEGORY)
+            || "".equals(Settings.INBOX_LOG_CHANNEL) || "".equals(Settings.INBOX_ARCHIVE_CHANNEL)
             || "".equals(Settings.MAIN_GUILD) || "".equals(Settings.MAIN_INVITE)
-            || "".equals(Settings.LOG_CHANNEL) || "".equals(Settings.ARCHIVE_CHANNEL)
         ) {
             System.err.println("Failed to load arguments, please read the code for 'help'.");
             return;
@@ -147,7 +171,7 @@ public class ModMail {
         }
 
         for(Category c : inboxGuild.getCategories()) {
-            if(c.getId().equals(Settings.INBOX_CATEGORY)) {
+            if(c.getId().equals(Settings.INBOX_DEFAULT_CATEGORY)) {
                 inboxCategory = c;
                 System.out.println("Found inbox category: " + c.getName());
                 break;
@@ -159,7 +183,7 @@ public class ModMail {
         }
 
         for(TextChannel ch : inboxGuild.getTextChannels()) {
-            if(ch.getId().equals(Settings.LOG_CHANNEL)) {
+            if(ch.getId().equals(Settings.INBOX_LOG_CHANNEL)) {
                 logChannel = ch;
                 System.out.println("Found log channel: " + ch.getName());
                 break;
@@ -171,7 +195,7 @@ public class ModMail {
         }
 
         for(TextChannel ch : inboxGuild.getTextChannels()) {
-            if(ch.getId().equals(Settings.ARCHIVE_CHANNEL)) {
+            if(ch.getId().equals(Settings.INBOX_ARCHIVE_CHANNEL)) {
                 archiveChannel = ch;
                 System.out.println("Found archive channel: " + ch.getName());
             }
