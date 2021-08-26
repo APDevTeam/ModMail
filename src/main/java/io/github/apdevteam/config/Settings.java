@@ -69,6 +69,7 @@ public class Settings {
         Settings.MAIN_GUILD = config.getOrElse("Main.Guild", "");
         Settings.MAIN_INVITE = config.getOrElse("Main.Invite", "");
 
+        config.close();
 
         // Verify config
         return !"".equals(Settings.TOKEN) && !"".equals(Settings.PREFIX)

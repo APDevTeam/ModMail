@@ -171,7 +171,7 @@ public class ModMail {
 
         log("Shutting down..." + (Settings.DEBUG ? "\n        DEBUG ENABLED" : ""), Color.RED, true);
         try {
-            Thread.sleep(3750);
+            Thread.sleep(2500);
         }
         catch (InterruptedException e) {
             e.printStackTrace();
