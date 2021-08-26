@@ -40,18 +40,10 @@ public class InboxCommandListener extends ListenerAdapter {
 
         String command = content.substring(1).split(" ")[0];
         switch (command) {
-            case "open":
-                open(msg);
-                break;
-            case "reply":
-                reply(msg);
-                break;
-            case "close":
-                close(msg);
-                break;
-            default:
-                invalidCommand(msg);
-                break;
+            case "open" -> open(msg);
+            case "reply" -> reply(msg);
+            case "close" -> close(msg);
+            default -> invalidCommand(msg);
         }
     }
 
@@ -278,7 +270,7 @@ public class InboxCommandListener extends ListenerAdapter {
                         // Inform DM
                         privateChannel -> privateChannel.sendMessageEmbeds(embed).queue(
                             // Archive channel
-                            dm -> LogUtils.archive(u.getId(), ModMail.getInstance().getArchiveChannel(),
+                            dm -> LogUtils.archive(u, ModMail.getInstance().getArchiveChannel(),
                                 // Delete channel
                                 unused -> inboxChannel.delete().queue(
                                     null,

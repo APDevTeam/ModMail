@@ -177,7 +177,7 @@ public class DirectMessageCommandListener extends ListenerAdapter {
             // Inform DM
             unused -> privateChannel.sendMessageEmbeds(embed).queue(
                 // Archive channel
-                dm -> LogUtils.archive(u.getId(), ModMail.getInstance().getArchiveChannel(),
+                dm -> LogUtils.archive(u, ModMail.getInstance().getArchiveChannel(),
                     // Delete channel
                     unused2 -> inboxChannel.delete().queue(
                         null,

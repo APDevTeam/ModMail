@@ -2,6 +2,7 @@ package io.github.apdevteam.utils;
 
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedWriter;
@@ -50,16 +51,17 @@ public class LogUtils {
     }
 
     public static void archive(
-        @NotNull String logID,
+        @NotNull User user,
         @NotNull TextChannel channel,
         @NotNull Consumer<Message> success,
         @NotNull Consumer<Throwable> failure
     ) {
-        File f = new File(".", folder + "/" + logID + "." + extension);
+        File f = new File(".", folder + "/" + user.getId() + "." + extension);
         if(!f.exists() || !f.canRead() || !f.canWrite() || f.isDirectory())
             failure.accept(new Throwable("Does not exist / can't read / can't write / is directory").fillInStackTrace());
 
-        channel.sendMessage(logID).addFile(f).queue(
+        String msg = user.getName() + "#" + user.getDiscriminator() + "<" + user.getId() + ">";
+        channel.sendMessage(msg).addFile(f).queue(
             ((Consumer<Message>) message -> {
                 if (!f.delete())
                     failure.accept(new Throwable("Failed to delete file").fillInStackTrace());

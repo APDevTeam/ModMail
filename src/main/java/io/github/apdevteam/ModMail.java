@@ -264,7 +264,11 @@ public class ModMail {
         );
     }
 
-    public void getUserbyID(@NotNull String userID, @NotNull Consumer<User> success, @Nullable Consumer<Throwable> failure) {
+    public void getUserbyID(
+        @NotNull String userID,
+        @NotNull Consumer<User> success,
+        @Nullable Consumer<Throwable> failure
+    ) {
         if(jda == null)
             throw new IllegalStateException("JDA is in an invalid state");
 
@@ -279,7 +283,6 @@ public class ModMail {
         @NotNull OffsetDateTime timestamp,
         @NotNull Consumer<TextChannel> callback
     ) throws InsufficientPermissionException {
-
         if(jda == null || inboxGuild == null || inboxCategory == null)
             throw new IllegalStateException("JDA is in an invalid state");
 
