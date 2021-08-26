@@ -60,7 +60,7 @@ public class LogUtils {
         if(!f.exists() || !f.canRead() || !f.canWrite() || f.isDirectory())
             failure.accept(new Throwable("Does not exist / can't read / can't write / is directory").fillInStackTrace());
 
-        String msg = user.getName() + "#" + user.getDiscriminator() + "<" + user.getId() + ">";
+        String msg = user.getName() + "#" + user.getDiscriminator() + " <" + user.getId() + ">";
         channel.sendMessage(msg).addFile(f).queue(
             ((Consumer<Message>) message -> {
                 if (!f.delete())
