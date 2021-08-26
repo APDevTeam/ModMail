@@ -17,7 +17,6 @@ import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
-import net.dv8tion.jda.api.utils.MiscUtil;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -26,9 +25,7 @@ import javax.security.auth.login.LoginException;
 import java.awt.*;
 import java.io.File;
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 public class ModMail {
     private static ModMail instance = null;
@@ -41,14 +38,14 @@ public class ModMail {
     public static void main(String @NotNull [] args) {
         ConfigSpec spec = new ConfigSpec();
         spec.define("Debug", false);
-        spec.define("Token", "", Settings.snowflakeValidator());
+        spec.define("Token", "", Settings.tokenValidator());
         spec.define("Prefix", "%", Settings.prefixValidator());
         spec.define("Inbox.Guild", "", Settings.snowflakeValidator());
         spec.define("Inbox.Category", "", Settings.snowflakeValidator());
         spec.define("Inbox.Log", "", Settings.snowflakeValidator());
         spec.define("Inbox.Archive", "", Settings.snowflakeValidator());
         spec.define("Main.Guild", "", Settings.snowflakeValidator());
-        spec.define("Main.Invite", "", Settings.snowflakeValidator());
+        spec.define("Main.Invite", "", Settings.inviteValidator());
 
 
         // Load config

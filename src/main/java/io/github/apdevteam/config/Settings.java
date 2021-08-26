@@ -20,6 +20,16 @@ public class Settings {
     public static String MAIN_INVITE = "";
 
     @Contract(pure = true)
+    public static @NotNull Predicate<Object> tokenValidator() {
+        return o -> {
+            if(!(o instanceof String s))
+                return false;
+
+            return s.length() >= 1;
+        };
+    }
+
+    @Contract(pure = true)
     public static @NotNull Predicate<Object> snowflakeValidator() {
         return o -> {
             if(!(o instanceof String))
@@ -38,10 +48,9 @@ public class Settings {
     @Contract(pure = true)
     public static @NotNull Predicate<Object> prefixValidator() {
         return o -> { // Prefix Validator
-            if(!(o instanceof String))
+            if(!(o instanceof String s))
                 return false;
 
-            String s = (String) o;
             if(s.length() < 1)
                 return false;
 
@@ -50,6 +59,16 @@ public class Settings {
                     return false;
             }
             return true;
+        };
+    }
+
+    @Contract(pure = true)
+    public static @NotNull Predicate<Object> inviteValidator() {
+        return o -> {
+            if(!(o instanceof String s))
+                return false;
+
+            return s.length() >= 1;
         };
     }
 }
