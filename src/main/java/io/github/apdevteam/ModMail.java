@@ -1,5 +1,6 @@
 package io.github.apdevteam;
 
+import io.github.apdevteam.config.Blocked;
 import io.github.apdevteam.config.Settings;
 import io.github.apdevteam.listener.DirectMessageCommandListener;
 import io.github.apdevteam.listener.InboxCommandListener;
@@ -37,6 +38,7 @@ public class ModMail {
             System.err.println("Failed to load arguments, please read the code for 'help'.");
             return;
         }
+        Blocked.load();
 
         new ModMail();
     }

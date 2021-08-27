@@ -13,6 +13,6 @@ Guild = ""
 Invite = ""
 
 [Teams]
-ShortNames = ["Admin", "Dev", "RP", "APEX", "Build", "YT"]
-LongNames = ["Admin", "Developer", "Roleplay", "Expansion", "Build", "YouTube"]
+ShortNames = []
+LongNames = []
 Emoji = [] # TODO

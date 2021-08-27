@@ -72,6 +72,7 @@
                 <targetPath>.</targetPath>
                 <includes>
                     <include>config.toml</include>
+                    <include>blocked.toml</include>
                 </includes>
             </resource>
         </resources>

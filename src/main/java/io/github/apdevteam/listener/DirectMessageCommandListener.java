@@ -1,6 +1,7 @@
 package io.github.apdevteam.listener;
 
 import io.github.apdevteam.ModMail;
+import io.github.apdevteam.config.Blocked;
 import io.github.apdevteam.config.Settings;
 import io.github.apdevteam.utils.EmbedUtils;
 import io.github.apdevteam.utils.LogUtils;
@@ -41,6 +42,12 @@ public class DirectMessageCommandListener extends ListenerAdapter {
         // Check for commands
         String content = msg.getContentStripped();
         if(!content.startsWith(Settings.PREFIX)) {
+            return;
+        }
+
+        // Check for blocked
+        if(Blocked.BLOCKED_IDs != null && Blocked.BLOCKED_IDs.contains(u.getId())) {
+            blocked(e.getChannel(), u);
             return;
         }
 
@@ -92,6 +99,24 @@ public class DirectMessageCommandListener extends ListenerAdapter {
         channel.sendMessageEmbeds(embed).queue(
             null,
             error -> ModMail.getInstance().error("Failed to send invite embed '" + embed + "' to '" + author + "'")
+        );
+    }
+
+    private void blocked(final @NotNull PrivateChannel channel, final @NotNull User author) {
+        final MessageEmbed embed = EmbedUtils.buildEmbed(
+                null,
+                null,
+                "You are blocked from using the ModMail bot.",
+                Color.RED,
+                "Please appeal on our site: " + Blocked.APPEAL_LINK,
+                null,
+                null,
+                null,
+                null
+        );
+        channel.sendMessageEmbeds(embed).queue(
+                null,
+                error -> ModMail.getInstance().error("Failed to send blocked embed '" + embed + "' to '" + author + "'")
         );
     }
 
