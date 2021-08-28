@@ -373,7 +373,47 @@ public class InboxCommandListener extends ListenerAdapter {
                     );
                 }
             },
-            error -> ModMail.getInstance().error("Failed to retrieve blocked user: " + msg)
+            unused -> {
+                User u = User.fromId(userID);
+                if(Blocked.block(u)) {
+                    msg.getChannel().sendMessageEmbeds(EmbedUtils.buildEmbed(
+                        msg.getAuthor().getName(),
+                        msg.getAuthor().getAvatarUrl(),
+                        "Blocked user",
+                        Color.GREEN,
+                        "<@" + u.getId() + ">",
+                        null,
+                        null,
+                        null,
+                        null
+                    )).queue(
+                        message -> msg.delete().queue(
+                            null,
+                            error -> ModMail.getInstance().error("Failed to delete blocked: " + userID)
+                        ),
+                        error -> ModMail.getInstance().error("Failed to send blocked: " + msg)
+                    );
+                }
+                else {
+                    msg.getChannel().sendMessageEmbeds(EmbedUtils.buildEmbed(
+                        msg.getAuthor().getName(),
+                        msg.getAuthor().getAvatarUrl(),
+                        "Failed to block user",
+                        Color.RED,
+                        "<@" + u.getId() + ">",
+                        null,
+                        null,
+                        null,
+                        null
+                    )).queue(
+                        message -> msg.delete().queue(
+                            null,
+                            error -> ModMail.getInstance().error("Failed to delete blocked: " + userID)
+                        ),
+                        error -> ModMail.getInstance().error("Failed to send blocked: " + msg)
+                    );
+                }
+            }
         );
     }
 
@@ -439,7 +479,47 @@ public class InboxCommandListener extends ListenerAdapter {
                     );
                 }
             },
-            error -> ModMail.getInstance().error("Failed to retrieve unblocked user: " + msg)
+            unused -> {
+                User u = User.fromId(userID);
+                if(Blocked.unblock(u)) {
+                    msg.getChannel().sendMessageEmbeds(EmbedUtils.buildEmbed(
+                        msg.getAuthor().getName(),
+                        msg.getAuthor().getAvatarUrl(),
+                        "Unblocked user",
+                        Color.GREEN,
+                        "<@" + u.getId() + ">",
+                        null,
+                        null,
+                        null,
+                        null
+                    )).queue(
+                        message -> msg.delete().queue(
+                            null,
+                            error -> ModMail.getInstance().error("Failed to delete unblocked: " + userID)
+                        ),
+                        error -> ModMail.getInstance().error("Failed to send unblocked: " + msg)
+                    );
+                }
+                else {
+                    msg.getChannel().sendMessageEmbeds(EmbedUtils.buildEmbed(
+                        msg.getAuthor().getName(),
+                        msg.getAuthor().getAvatarUrl(),
+                        "Failed to unblock user",
+                        Color.RED,
+                        "<@" + u.getId() + ">",
+                        null,
+                        null,
+                        null,
+                        null
+                    )).queue(
+                        message -> msg.delete().queue(
+                            null,
+                            error -> ModMail.getInstance().error("Failed to delete unblocked: " + userID)
+                        ),
+                        error -> ModMail.getInstance().error("Failed to send unblocked: " + msg)
+                    );
+                }
+            }
         );
     }
 
