@@ -7,6 +7,7 @@ Guild = ""
 Category = ""
 Log = ""
 Archive = ""
+ModRoles = []
 
 [Main]
 Guild = ""

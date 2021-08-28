@@ -1,12 +1,15 @@
 package io.github.apdevteam.listener;
 
 import io.github.apdevteam.ModMail;
+import io.github.apdevteam.config.Blocked;
 import io.github.apdevteam.config.Settings;
 import io.github.apdevteam.utils.EmbedUtils;
 import io.github.apdevteam.utils.LogUtils;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.PrivateChannel;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -16,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class InboxCommandListener extends ListenerAdapter {
@@ -43,6 +47,8 @@ public class InboxCommandListener extends ListenerAdapter {
             case "open" -> open(msg);
             case "reply" -> reply(msg);
             case "close" -> close(msg);
+            case "block" -> block(msg);
+            case "unblock" -> unblock(msg);
             default -> invalidCommand(msg);
         }
     }
@@ -303,6 +309,146 @@ public class InboxCommandListener extends ListenerAdapter {
             },
             error -> ModMail.getInstance().error("Failed to get user for close: " + error.getMessage())
         );
+    }
+
+    private void block(final @NotNull Message msg) {
+        Member author = msg.getMember();
+        if(author == null) {
+            ModMail.getInstance().error("Null author of: " + msg);
+            return;
+        }
+        if(Settings.MODERATOR_ROLES == null) {
+            ModMail.getInstance().error("Null blocked users: " + msg);
+            return;
+        }
+        if(!isModerator(author, Settings.MODERATOR_ROLES)) {
+            msg.delete().queue(
+                null,
+                error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage())
+            );
+            return;
+        }
+
+        // Author is a moderator with permission to block a user
+        String userID = msg.getContentStripped().substring(1).split(" ")[1];
+        ModMail.getInstance().getUserbyID(
+            userID,
+            u -> {
+                if(Blocked.block(u)) {
+                    msg.getChannel().sendMessageEmbeds(EmbedUtils.buildEmbed(
+                        msg.getAuthor().getName(),
+                        msg.getAuthor().getAvatarUrl(),
+                        "Blocked user",
+                        Color.GREEN,
+                        "<@" + u.getId() + ">",
+                        null,
+                        null,
+                        null,
+                        null
+                    )).queue(
+                        message -> msg.delete().queue(
+                            null,
+                            error -> ModMail.getInstance().error("Failed to delete blocked: " + userID)
+                        ),
+                        error -> ModMail.getInstance().error("Failed to send blocked: " + msg)
+                    );
+                }
+                else {
+                    msg.getChannel().sendMessageEmbeds(EmbedUtils.buildEmbed(
+                        msg.getAuthor().getName(),
+                        msg.getAuthor().getAvatarUrl(),
+                        "Failed to block user",
+                        Color.RED,
+                        "<@" + u.getId() + ">",
+                        null,
+                        null,
+                        null,
+                        null
+                    )).queue(
+                        message -> msg.delete().queue(
+                            null,
+                            error -> ModMail.getInstance().error("Failed to delete blocked: " + userID)
+                        ),
+                        error -> ModMail.getInstance().error("Failed to send blocked: " + msg)
+                    );
+                }
+            },
+            error -> ModMail.getInstance().error("Failed to retrieve blocked user: " + msg)
+        );
+    }
+
+    private void unblock(final @NotNull Message msg) {
+        Member author = msg.getMember();
+        if(author == null) {
+            ModMail.getInstance().error("Null author of: " + msg);
+            return;
+        }
+        if(Settings.MODERATOR_ROLES == null) {
+            ModMail.getInstance().error("Null blocked users: " + msg);
+            return;
+        }
+        if(!isModerator(author, Settings.MODERATOR_ROLES)) {
+            msg.delete().queue(
+                    null,
+                    error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage())
+            );
+            return;
+        }
+
+        // Author is a moderator with permission to unblock a user
+        String userID = msg.getContentStripped().substring(1).split(" ")[1];
+        ModMail.getInstance().getUserbyID(
+            userID,
+            u -> {
+                if(Blocked.block(u)) {
+                    msg.getChannel().sendMessageEmbeds(EmbedUtils.buildEmbed(
+                        msg.getAuthor().getName(),
+                        msg.getAuthor().getAvatarUrl(),
+                        "Unblocked user",
+                        Color.GREEN,
+                        "<@" + u.getId() + ">",
+                        null,
+                        null,
+                        null,
+                        null
+                    )).queue(
+                        message -> msg.delete().queue(
+                            null,
+                            error -> ModMail.getInstance().error("Failed to delete unblocked: " + userID)
+                        ),
+                        error -> ModMail.getInstance().error("Failed to send unblocked: " + msg)
+                    );
+                }
+                else {
+                    msg.getChannel().sendMessageEmbeds(EmbedUtils.buildEmbed(
+                        msg.getAuthor().getName(),
+                        msg.getAuthor().getAvatarUrl(),
+                        "Failed to unblock user",
+                        Color.RED,
+                        "<@" + u.getId() + ">",
+                        null,
+                        null,
+                        null,
+                        null
+                    )).queue(
+                        message -> msg.delete().queue(
+                            null,
+                            error -> ModMail.getInstance().error("Failed to delete unblocked: " + userID)
+                        ),
+                        error -> ModMail.getInstance().error("Failed to send unblocked: " + msg)
+                    );
+                }
+            },
+            error -> ModMail.getInstance().error("Failed to retrieve unblocked user: " + msg)
+        );
+    }
+
+    private boolean isModerator(@NotNull Member m, @NotNull List<String> modRoles) {
+        for(Role r : m.getRoles()) {
+            if(modRoles.contains(r.getId()))
+                return true;
+        }
+        return false;
     }
 
     private void invalidInbox(final @NotNull TextChannel channel, final @NotNull Message msg) {

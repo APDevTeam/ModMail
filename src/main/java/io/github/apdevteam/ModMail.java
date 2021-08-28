@@ -35,10 +35,13 @@ public class ModMail {
 
     public static void main(String @NotNull [] args) {
         if (!Settings.load()) {
-            System.err.println("Failed to load arguments, please read the code for 'help'.");
+            System.err.println("Failed to load Settings, please read the code for 'help'.");
             return;
         }
-        Blocked.load();
+        if(!Blocked.load()) {
+            System.err.println("Failed to load Blocked, please read the code for 'help'.");
+            return;
+        }
 
         new ModMail();
     }
@@ -164,14 +167,22 @@ public class ModMail {
         jda.addEventListener(new InboxListener());
 
         instance = this;
-        log("Successfully booted!" + (Settings.DEBUG ? "\n        DEBUG ENABLED" : ""), Color.GREEN, true);
+        log(
+            "Successfully booted!" + (Settings.DEBUG ? "\n        DEBUG ENABLED" : ""),
+            "v" + getClass().getPackage().getImplementationVersion(),
+            Color.GREEN
+        );
     }
 
     public void shutdown() {
         if(jda == null)
             return;
 
-        log("Shutting down..." + (Settings.DEBUG ? "\n        DEBUG ENABLED" : ""), Color.RED, true);
+        log(
+            "Shutting down..." + (Settings.DEBUG ? "\n        DEBUG ENABLED" : ""),
+            "v" + getClass().getPackage().getImplementationVersion(),
+            Color.RED
+        );
         try {
             Thread.sleep(2500);
         }
@@ -184,15 +195,18 @@ public class ModMail {
     }
 
     public void log(String message) {
-        log(message, Color.BLUE, false);
+        log(null, message, Color.BLUE);
     }
 
     public void log(String message, Color color) {
-        log(message, color, false);
+        log(null, message, color);
     }
 
-    private void log(String message, Color color, boolean bold) {
-        System.out.println(message);
+    private void log(@Nullable String title, @Nullable String message, @NotNull Color color) {
+        if(title != null)
+            System.out.println(title + "\n\t" + message);
+        else
+            System.out.println(message);
 
         if(logChannel == null)
             error("JDA is in an invalid state");
@@ -200,9 +214,9 @@ public class ModMail {
         logChannel.sendMessageEmbeds(EmbedUtils.buildEmbed(
             null,
             null,
-            bold ? message : null, // Send as title if bold
+            title,
             color,
-            bold ? null : message, // Send as text if not bold
+            message,
             null,
             null,
             null,

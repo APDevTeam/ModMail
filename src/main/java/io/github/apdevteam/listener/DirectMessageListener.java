@@ -91,7 +91,7 @@ public class DirectMessageListener extends ListenerAdapter {
         }
 
         // Check for blocked
-        if(Blocked.BLOCKED_IDs != null && Blocked.BLOCKED_IDs.contains(u.getId())) {
+        if(Blocked.BLOCKED_IDS != null && Blocked.BLOCKED_IDS.contains(u.getId())) {
             blocked(e.getChannel(), u);
             return;
         }

@@ -6,8 +6,12 @@ import com.electronwill.nightconfig.core.file.FileConfigBuilder;
 import net.dv8tion.jda.api.utils.MiscUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.function.Predicate;
 
 public class Settings {
@@ -19,6 +23,8 @@ public class Settings {
     public static String INBOX_DEFAULT_CATEGORY = "";
     public static String INBOX_LOG_CHANNEL = "";
     public static String INBOX_ARCHIVE_CHANNEL = "";
+    @Nullable
+    public static List<String> MODERATOR_ROLES = null;
 
     public static String MAIN_GUILD = "";
     public static String MAIN_INVITE = "";
@@ -43,7 +49,7 @@ public class Settings {
         config.load();
 
         // Check config against spec
-        spec.correct(config, (correctionAction, path, from, to) -> {
+        /*spec.correct(config, (correctionAction, path, from, to) -> {
             String s = " config value '" + String.join(".", path) + "' from '" + from + "' to '" + to + "'";
             switch(correctionAction) {
                 case ADD:
@@ -54,7 +60,7 @@ public class Settings {
                 default:
                     System.err.println("Corrected" + s);
             }
-        });
+        });*/
 
         // Load into Settings
         Settings.DEBUG = config.getOrElse("Debug", false);
@@ -68,6 +74,16 @@ public class Settings {
 
         Settings.MAIN_GUILD = config.getOrElse("Main.Guild", "");
         Settings.MAIN_INVITE = config.getOrElse("Main.Invite", "");
+
+        // Load and verify MODERATOR_ROLES
+        Collection<Object> collection = config.getOrElse("Inbox.ModRoles", () -> null);
+        if(collection == null)
+            return false;
+        Settings.MODERATOR_ROLES = new ArrayList<>();
+        for(Object o : collection) {
+            if(snowflakeValidator().test(o))
+                Settings.MODERATOR_ROLES.add((String) o);
+        }
 
         config.close();
 
@@ -130,4 +146,6 @@ public class Settings {
             return s.length() >= 1;
         };
     }
+
+    // TODO: Implement a config spec and validator for moderator roles
 }
