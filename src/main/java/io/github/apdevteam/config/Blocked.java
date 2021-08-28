@@ -108,7 +108,9 @@ public class Blocked {
         FileConfigBuilder builder = FileConfig.builder(configFile);
         FileConfig config = builder.defaultResource("/blocked.toml").sync().build();
         config.load();
+        System.out.println(BLOCKED_IDS);
         BLOCKED_IDS.remove(userID);
+        System.out.println(BLOCKED_IDS);
         config.set("Blocked.Users", BLOCKED_IDS);
         config.save();
         config.close();
