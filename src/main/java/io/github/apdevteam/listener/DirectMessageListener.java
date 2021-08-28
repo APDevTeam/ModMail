@@ -39,6 +39,12 @@ public class DirectMessageListener extends ListenerAdapter {
         final Message msg = e.getMessage();
         TextChannel modMailInbox = ModMail.getInstance().getModMailInbox(u);
         if(modMailInbox == null) {
+            // Check for blocked
+            if(Blocked.BLOCKED_IDS != null && Blocked.BLOCKED_IDS.contains(u.getId())) {
+                blocked(e.getChannel(), u);
+                return;
+            }
+
             try { // Try creating a channel and forwarding the message
                 ModMail.getInstance().createModMail(
                     u,
