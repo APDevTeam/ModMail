@@ -400,7 +400,7 @@ public class InboxCommandListener extends ListenerAdapter {
         ModMail.getInstance().getUserbyID(
             userID,
             u -> {
-                if(Blocked.block(u)) {
+                if(Blocked.unblock(u)) {
                     msg.getChannel().sendMessageEmbeds(EmbedUtils.buildEmbed(
                         msg.getAuthor().getName(),
                         msg.getAuthor().getAvatarUrl(),
