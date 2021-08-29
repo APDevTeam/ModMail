@@ -183,7 +183,7 @@ public class ModMail {
             "v" + getClass().getPackage().getImplementationVersion(),
             Color.RED
         );
-        jda.shutdownNow();
+        jda.shutdown();
         jda = null;
         System.out.println("Shut down.");
     }
