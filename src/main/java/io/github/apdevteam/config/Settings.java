@@ -39,9 +39,12 @@ public class Settings {
         spec.define("Inbox.Category", "", Settings.snowflakeValidator());
         spec.define("Inbox.Log", "", Settings.snowflakeValidator());
         spec.define("Inbox.Archive", "", Settings.snowflakeValidator());
-        spec.define("Main.Guild", "", Settings.snowflakeValidator());
-        spec.define("Main.Invite", "", Settings.inviteValidator());
         spec.define("Inbox.ModRoles", new ArrayList<>(), Settings.snowflakeListValidator());
+        spec.define("Main.Guild", "", Settings.snowflakeValidator());
+        spec.define("Main.Invite", "", Settings.stringValidator());
+        spec.define("Teams.ShortNames", new ArrayList<>(), Settings.stringListValidator());
+        spec.define("Teams.LongNames", new ArrayList<>(), Settings.stringListValidator());
+        spec.define("Teams.Emoji", new ArrayList<>(), Settings.stringListValidator());
 
         // Load config
         File configFile = new File("config.toml");
@@ -86,6 +89,7 @@ public class Settings {
                 Settings.MODERATOR_ROLES.add((String) o);
         }
 
+        config.save();
         config.close();
 
         // Verify config
@@ -160,7 +164,7 @@ public class Settings {
     }
 
     @Contract(pure = true)
-    private static @NotNull Predicate<Object> inviteValidator() {
+    private static @NotNull Predicate<Object> stringValidator() {
         return o -> {
             if(!(o instanceof String s))
                 return false;
@@ -169,5 +173,19 @@ public class Settings {
         };
     }
 
-    // TODO: Implement a config spec and validator for moderator roles
+    @Contract(pure = true)
+    private static @NotNull Predicate<Object> stringListValidator() {
+        return o -> {
+            if(!(o instanceof List<?> l))
+                return false;
+
+            for(Object i : l) {
+                if (!(i instanceof String s))
+                    return false;
+                if(s.length() < 1)
+                    return false;
+            }
+            return true;
+        };
+    }
 }

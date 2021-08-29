@@ -21,7 +21,7 @@ public class Blocked {
     public static String APPEAL_LINK = null;
 
     public static boolean load() {
-        // Define config specificaion
+        // Define config specification
         ConfigSpec spec = new ConfigSpec();
         spec.define("Blocked.Appeal", "");
         spec.define("Blocked.Users", new ArrayList<>(), Blocked.snowflakeListValidator());
@@ -59,6 +59,7 @@ public class Blocked {
         // Load config into Blocked
         Blocked.APPEAL_LINK = config.getOrElse("Blocked.Appeal", "");
 
+        config.save();
         config.close();
 
         // Verify config
@@ -114,6 +115,7 @@ public class Blocked {
         config.load();
         BLOCKED_IDS.add(userID);
         config.set("Blocked.Users", BLOCKED_IDS);
+
         config.save();
         config.close();
 
@@ -132,6 +134,7 @@ public class Blocked {
         config.load();
         BLOCKED_IDS.remove(userID);
         config.set("Blocked.Users", BLOCKED_IDS);
+
         config.save();
         config.close();
 
