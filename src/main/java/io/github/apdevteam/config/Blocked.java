@@ -24,6 +24,7 @@ public class Blocked {
         // Define config specificaion
         ConfigSpec spec = new ConfigSpec();
         spec.define("Blocked.Appeal", "");
+        spec.define("Blocked.Users", new ArrayList<>(), Blocked.snowflakeListValidator());
 
         // Load config
         File configFile = new File("blocked.toml");
@@ -32,7 +33,7 @@ public class Blocked {
         config.load();
 
         // Check config against spec
-        /*spec.correct(config, (correctionAction, path, from, to) -> {
+        spec.correct(config, (correctionAction, path, from, to) -> {
             String s = " config value '" + String.join(".", path) + "' from '" + from + "' to '" + to + "'";
             switch(correctionAction) {
                 case ADD:
@@ -43,7 +44,7 @@ public class Blocked {
                 default:
                     System.err.println("Corrected" + s);
             }
-        });*/
+        });
 
         // Load and verify BLOCKED_IDs
         Collection<Object> collection = config.getOrElse("Blocked.Users", () -> null);
@@ -75,6 +76,27 @@ public class Blocked {
             }
             catch (NumberFormatException e) {
                 return false;
+            }
+            return true;
+        };
+    }
+
+    @Contract(pure = true)
+    private static @NotNull Predicate<Object> snowflakeListValidator() {
+        return o -> {
+            if(!(o instanceof List<?> l))
+                return false;
+
+            for(Object s : l) {
+                if(!(s instanceof String))
+                    return false;
+
+                try {
+                    MiscUtil.parseSnowflake((String) s);
+                }
+                catch (NumberFormatException e) {
+                    return false;
+                }
             }
             return true;
         };
