@@ -199,7 +199,7 @@ public class InboxCommandListener extends ListenerAdapter {
                                     inboxMessage -> EmbedUtils.forwardAttachments(
                                         inboxMessage,
                                         msg.getAuthor(),
-                                        Arrays.asList(privateChannel, inboxChannel),
+                                        List.of(inboxChannel),
                                         msg.getAttachments(),
                                         Color.GREEN,
                                         "Staff",

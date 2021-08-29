@@ -183,13 +183,7 @@ public class ModMail {
             "v" + getClass().getPackage().getImplementationVersion(),
             Color.RED
         );
-        try {
-            Thread.sleep(2500);
-        }
-        catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        jda.shutdown();
+        jda.shutdownNow();
         jda = null;
         System.out.println("Shut down.");
     }
