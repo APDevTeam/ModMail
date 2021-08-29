@@ -369,6 +369,5 @@ public class ModMail {
 
     /* TODO:
         - Add the ability to add staff teams (with fancy reacts maybe?)
-        - Add a replay ability to replay a ModMail to a channel?
      */
 }

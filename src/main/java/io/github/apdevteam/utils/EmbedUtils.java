@@ -73,6 +73,7 @@ public class EmbedUtils {
     }
 
     public static void forwardAttachments(
+        final @NotNull Message main,
         final @NotNull User user,
         final @NotNull Collection<MessageChannel> channels,
         final @NotNull List<Message.Attachment> attachments,
@@ -89,7 +90,7 @@ public class EmbedUtils {
         }
 
         for(MessageChannel channel : channels) {
-            channel.sendMessageEmbeds(embeds).queue(
+            channel.sendMessageEmbeds(embeds).reference(main).queue(
                 null,
                 error -> ModMail.getInstance().error("Failed to send attachments: " + error.getMessage())
             );

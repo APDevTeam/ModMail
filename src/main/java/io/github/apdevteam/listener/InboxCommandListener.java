@@ -8,7 +8,6 @@ import io.github.apdevteam.utils.LogUtils;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
@@ -171,50 +170,53 @@ public class InboxCommandListener extends ListenerAdapter {
                             ModMail.getInstance().error("Failed to log attachment '" + u + ": " + a.getUrl() + "'");
                     }
 
+                    // Get private ModMail channel
                     ModMail.getInstance().getModMail(
                         u,
-                        // Forward text to DM
-                        (
-                            (Consumer<PrivateChannel>) privateChannel -> EmbedUtils.forwardText(
+                        // Forward text to private ModMail channel
+                        privateChannel -> EmbedUtils.forwardText(
+                            msg.getAuthor(),
+                            content,
+                            privateChannel,
+                            Color.GREEN,
+                            // Forward attachments to private ModMail channel
+                            ((Consumer<Message>) privateMessage -> EmbedUtils.forwardAttachments(
+                                privateMessage,
                                 msg.getAuthor(),
-                                content,
-                                privateChannel,
+                                List.of(privateChannel),
+                                msg.getAttachments(),
                                 Color.GREEN,
-                                null,
                                 "Staff",
                                 msg.getTimeCreated()
-                            )
-                        // Forward text to inbox
-                        ).andThen(
-                            (
-                                (Consumer<PrivateChannel>) privateChannel -> EmbedUtils.forwardText(
+                            )).andThen(
+                                // Forward text to inbox ModMail channel
+                                ((Consumer<Message>) message -> EmbedUtils.forwardText(
                                     msg.getAuthor(),
                                     content,
                                     inboxChannel,
                                     Color.GREEN,
-                                    null,
-                                    "Staff",
-                                    msg.getTimeCreated()
-                                )
-                            // Forward attachments to DM & inbox
-                            ).andThen(
-                                (
-                                    (Consumer<PrivateChannel>) privateChannel -> EmbedUtils.forwardAttachments(
+                                    // Forward attachments to inbox ModMail channel
+                                    inboxMessage -> EmbedUtils.forwardAttachments(
+                                        inboxMessage,
                                         msg.getAuthor(),
                                         Arrays.asList(privateChannel, inboxChannel),
                                         msg.getAttachments(),
                                         Color.GREEN,
                                         "Staff",
                                         msg.getTimeCreated()
-                                    )
-                                // Delete message
-                                ).andThen(
-                                    privateChannel -> msg.delete().queue(
+                                    ),
+                                    "Staff",
+                                    msg.getTimeCreated()
+                                )).andThen(
+                                    // Delete original message
+                                    message -> msg.delete().queue(
                                         null,
                                         error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage())
                                     )
                                 )
-                            )
+                            ),
+                            "Staff",
+                            msg.getTimeCreated()
                         )
                     );
                 }

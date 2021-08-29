@@ -158,6 +158,7 @@ public class DirectMessageListener extends ListenerAdapter {
             Color.YELLOW,
             message -> msg.addReaction("U+2705").queue(
                 unused -> EmbedUtils.forwardAttachments(
+                    message,
                     msg.getAuthor(),
                     Collections.singletonList(channel),
                     msg.getAttachments(),
