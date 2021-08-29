@@ -41,6 +41,7 @@ public class Settings {
         spec.define("Inbox.Archive", "", Settings.snowflakeValidator());
         spec.define("Main.Guild", "", Settings.snowflakeValidator());
         spec.define("Main.Invite", "", Settings.inviteValidator());
+        spec.define("Inbox.ModRoles", new ArrayList<>(), Settings.snowflakeListValidator());
 
         // Load config
         File configFile = new File("config.toml");
@@ -49,7 +50,7 @@ public class Settings {
         config.load();
 
         // Check config against spec
-        /*spec.correct(config, (correctionAction, path, from, to) -> {
+        spec.correct(config, (correctionAction, path, from, to) -> {
             String s = " config value '" + String.join(".", path) + "' from '" + from + "' to '" + to + "'";
             switch(correctionAction) {
                 case ADD:
@@ -60,7 +61,7 @@ public class Settings {
                 default:
                     System.err.println("Corrected" + s);
             }
-        });*/
+        });
 
         // Load into Settings
         Settings.DEBUG = config.getOrElse("Debug", false);
@@ -115,6 +116,27 @@ public class Settings {
             }
             catch (NumberFormatException e) {
                 return false;
+            }
+            return true;
+        };
+    }
+
+    @Contract(pure = true)
+    private static @NotNull Predicate<Object> snowflakeListValidator() {
+        return o -> {
+            if(!(o instanceof List<?> l))
+                return false;
+
+            for(Object s : l) {
+                if(!(s instanceof String))
+                    return false;
+
+                try {
+                    MiscUtil.parseSnowflake((String) s);
+                }
+                catch (NumberFormatException e) {
+                    return false;
+                }
             }
             return true;
         };
