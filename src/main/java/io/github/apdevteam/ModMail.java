@@ -167,7 +167,7 @@ public class ModMail {
         jda.addEventListener(new InboxListener());
 
         instance = this;
-        log(
+        logNow(
             "Successfully booted!" + (Settings.DEBUG ? "\n        DEBUG ENABLED" : ""),
             "v" + getClass().getPackage().getImplementationVersion(),
             Color.GREEN
@@ -178,7 +178,7 @@ public class ModMail {
         if(jda == null)
             return;
 
-        log(
+        logNow(
             "Shutting down..." + (Settings.DEBUG ? "\n        DEBUG ENABLED" : ""),
             "v" + getClass().getPackage().getImplementationVersion(),
             Color.RED
@@ -195,14 +195,32 @@ public class ModMail {
     }
 
     public void log(String message) {
-        log(null, message, Color.BLUE);
+        log(message, Color.BLUE);
     }
 
-    public void log(String message, Color color) {
-        log(null, message, color);
+    public void log(@Nullable String message, @NotNull Color color) {
+        System.out.println(message);
+
+        if(logChannel == null)
+            error("JDA is in an invalid state");
+
+        logChannel.sendMessageEmbeds(EmbedUtils.buildEmbed(
+                null,
+                null,
+                null,
+                color,
+                message,
+                null,
+                null,
+                null,
+                null
+        )).queue(
+                null,
+                error -> error(error.getMessage())
+        );
     }
 
-    private void log(@Nullable String title, @Nullable String message, @NotNull Color color) {
+    private void logNow(@Nullable String title, @Nullable String message, @NotNull Color color) {
         if(title != null)
             System.out.println(title + "\n\t" + message);
         else
@@ -221,10 +239,7 @@ public class ModMail {
             null,
             null,
             null
-        )).queue(
-            null,
-            error -> error(error.getMessage())
-        );
+        )).complete();
     }
 
     public void error(String message) {
