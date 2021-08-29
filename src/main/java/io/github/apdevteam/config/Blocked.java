@@ -140,6 +140,4 @@ public class Blocked {
 
         return true;
     }
-
-    // TODO: Implement a config spec and validator for blocked users
 }

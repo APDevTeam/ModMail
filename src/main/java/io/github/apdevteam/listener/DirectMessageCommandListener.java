@@ -72,15 +72,9 @@ public class DirectMessageCommandListener extends ListenerAdapter {
 
         String command = content.substring(1).split(" ")[0];
         switch (command) {
-            case "add":
-                add(msg);
-                break;
-            case "close":
-                close(msg);
-                break;
-            default:
-                invalidCommand(msg);
-                break;
+            case "add" -> add(msg);
+            case "close" -> close(msg);
+            default -> invalidCommand(msg);
         }
     }
 
