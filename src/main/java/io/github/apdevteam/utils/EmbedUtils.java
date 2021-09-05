@@ -1,6 +1,8 @@
 package io.github.apdevteam.utils;
 
 import io.github.apdevteam.ModMail;
+import io.github.apdevteam.config.Blocked;
+import io.github.apdevteam.config.Settings;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -17,7 +19,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class EmbedUtils {
-    public static @NotNull MessageEmbed buildEmbed(
+    private static @NotNull MessageEmbed buildEmbed(
         @Nullable String author,
         @Nullable String authorIcon,
         @Nullable String title,
@@ -172,6 +174,273 @@ public class EmbedUtils {
             attachment.getUrl(),
             footer,
             timestamp,
+            null,
+            null
+        );
+    }
+
+
+    public static @NotNull MessageEmbed blocked() {
+        return buildEmbed(
+            null,
+            null,
+            "You are blocked from using the ModMail bot.",
+            ColorUtils.userBlocked(),
+            "Please appeal on our site: " + Blocked.APPEAL_LINK,
+            null,
+            null,
+            null,
+            null
+        );
+    }
+
+    public static @NotNull MessageEmbed invite() {
+        return buildEmbed(
+            null,
+            null,
+            "Please join our discord server!",
+            ColorUtils.invite(),
+            Settings.MAIN_INVITE,
+            null,
+            null,
+            null,
+            null
+        );
+    }
+
+    public static @NotNull MessageEmbed invalidCmd(@NotNull Message msg) {
+        return buildEmbed(
+            msg.getAuthor().getName(),
+            msg.getAuthor().getAvatarUrl(),
+            "Invalid command",
+            ColorUtils.invalidCmd(),
+            msg.getContentDisplay(),
+            null,
+            null,
+            null,
+            null
+        );
+    }
+
+    public static @NotNull MessageEmbed invalidID() {
+        return buildEmbed(
+            null,
+            null,
+            "Invalid User ID",
+            ColorUtils.invalidUser(),
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+    }
+
+    public static @NotNull MessageEmbed notInbox(@Nullable OffsetDateTime timestamp) {
+        return buildEmbed(
+                null,
+                null,
+                "This is not a ModMail inbox.",
+                ColorUtils.notInbox(),
+                null,
+                null,
+                timestamp,
+                null,
+                null
+        );
+    }
+
+    public static @NotNull MessageEmbed addError() {
+        return buildEmbed(
+            null,
+            null,
+            null,
+            ColorUtils.addError(),
+            "Adding is not yet supported",
+            null,
+            null,
+            null,
+            null
+        );
+    }
+
+    public static @NotNull MessageEmbed existingModMail() {
+        return buildEmbed(
+            null,
+            null,
+            "This user already has a ModMail channel.",
+            ColorUtils.existingModMail(),
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+    }
+
+    public static @NotNull MessageEmbed adminOpened(@NotNull User author) {
+        return buildEmbed(
+            author.getName(),
+            author.getAvatarUrl(),
+            null,
+            ColorUtils.initialMessage(),
+            "Opened a ModMail session.",
+            null,
+            null,
+            null,
+            null
+        );
+    }
+
+    public static @NotNull MessageEmbed playerOpened() {
+        return buildEmbed(
+            null,
+            null,
+            "Thank you for your message!",
+            ColorUtils.initialMessage(),
+            "The AP Admin team will get back to you as soon as possible!",
+            null,
+            null,
+            null,
+            null
+        );
+    }
+
+    public static @NotNull MessageEmbed inboxOpened(@NotNull User user, @Nullable OffsetDateTime timestamp) {
+        return buildEmbed(
+            user.getName(),
+            user.getAvatarUrl(),
+            null,
+            ColorUtils.beginModMail(),
+            "ModMail thread started.",
+            "User ID: " + user.getId(),
+            timestamp,
+            user.getAvatarUrl(),
+            null
+        );
+    }
+
+    public static @NotNull MessageEmbed unblocked(@NotNull User author, @NotNull User unblocked) {
+        return buildEmbed(
+            author.getName(),
+            author.getAvatarUrl(),
+            "Unblocked user",
+            ColorUtils.unblocked(),
+            "<@" + unblocked.getId() + ">",
+            null,
+            null,
+            null,
+            null
+        );
+    }
+
+    public static @NotNull MessageEmbed unblockFailed(@NotNull User author, @NotNull User unblocked) {
+        return buildEmbed(
+            author.getName(),
+            author.getAvatarUrl(),
+            "Failed to unblock user",
+            ColorUtils.unblockFailed(),
+            "<@" + unblocked.getId() + ">",
+            null,
+            null,
+            null,
+            null
+        );
+    }
+
+    public static @NotNull MessageEmbed blocked(@NotNull User author, @NotNull User blocked) {
+        return buildEmbed(
+            author.getName(),
+            author.getAvatarUrl(),
+            "Blocked user",
+            ColorUtils.blocked(),
+            "<@" + blocked.getId() + ">",
+            null,
+            null,
+            null,
+            null
+        );
+    }
+
+    public static @NotNull MessageEmbed blockFailed(@NotNull User author, @NotNull User blocked) {
+        return buildEmbed(
+            author.getName(),
+            author.getAvatarUrl(),
+            "Failed to block user",
+            ColorUtils.blockFailed(),
+            "<@" + blocked.getId() + ">",
+            null,
+            null,
+            null,
+            null
+        );
+    }
+
+    public static @NotNull MessageEmbed close(@NotNull User author, @Nullable String footer, @Nullable OffsetDateTime timestamp) {
+        return buildEmbed(
+            author.getName(),
+            author.getAvatarUrl(),
+            "Thread Closed",
+            ColorUtils.closeModMail(),
+            null,
+            footer,
+            timestamp,
+            null,
+            null
+        );
+    }
+
+    public static @NotNull MessageEmbed closeFailed() {
+        return buildEmbed(
+            null,
+            null,
+            null,
+            ColorUtils.closeFailed(),
+            "Failed to close",
+            null,
+            null,
+            null,
+            null
+        );
+    }
+
+    public static @NotNull MessageEmbed openBeforeCmd() {
+        return buildEmbed(
+            null,
+            null,
+            null,
+            ColorUtils.noExistingModMail(),
+            "Please open a ModMail before using commands.",
+            null,
+            null,
+            null,
+            null
+        );
+    }
+
+    public static @NotNull MessageEmbed log(@Nullable String title, @NotNull Color color, @Nullable String message) {
+        return buildEmbed(
+            null,
+            null,
+            null,
+            ColorUtils.error(),
+            message,
+            null,
+            null,
+            null,
+            null
+        );
+    }
+
+    public static @NotNull MessageEmbed error(@NotNull String message) {
+        return buildEmbed(
+            null,
+            null,
+            null,
+            ColorUtils.error(),
+            message,
+            null,
+            null,
             null,
             null
         );

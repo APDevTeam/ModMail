@@ -3,6 +3,7 @@ package io.github.apdevteam.listener;
 import io.github.apdevteam.ModMail;
 import io.github.apdevteam.config.Blocked;
 import io.github.apdevteam.config.Settings;
+import io.github.apdevteam.utils.ColorUtils;
 import io.github.apdevteam.utils.EmbedUtils;
 import io.github.apdevteam.utils.LogUtils;
 import net.dv8tion.jda.api.entities.Member;
@@ -16,8 +17,6 @@ import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.*;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -32,7 +31,7 @@ public class InboxCommandListener extends ListenerAdapter {
         if (Settings.DEBUG)
             ModMail.getInstance().log("Received `'" + msg.getContentDisplay()
                 + "' from '" + u.getName() + "#" + u.getDiscriminator()
-                + "' in '" + msg.getChannel() + "'`", Color.YELLOW);
+                + "' in '" + msg.getChannel() + "'`", ColorUtils.debug());
 
         if (!msg.getGuild().getId().equals(Settings.INBOX_GUILD))
             return;
@@ -48,6 +47,7 @@ public class InboxCommandListener extends ListenerAdapter {
             case "close" -> close(msg);
             case "block" -> block(msg);
             case "unblock" -> unblock(msg);
+            case "add" -> add(msg);
             default -> invalidCommand(msg);
         }
     }
@@ -61,17 +61,9 @@ public class InboxCommandListener extends ListenerAdapter {
                 TextChannel textChannel = ModMail.getInstance().getModMailInbox(u);
                 if (textChannel != null) {
                     try {
-                        textChannel.sendMessageEmbeds(EmbedUtils.buildEmbed(
-                            null,
-                            null,
-                            "This user already has a ModMail channel.",
-                            Color.RED,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null
-                        )).queue(
+                        textChannel.sendMessageEmbeds(
+                            EmbedUtils.existingModMail()
+                        ).queue(
                             message -> msg.delete().queue(
                                 null,
                                 error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage())
@@ -101,17 +93,7 @@ public class InboxCommandListener extends ListenerAdapter {
 
                                 // Inform player
                                 privateChannel.sendMessageEmbeds(
-                                    EmbedUtils.buildEmbed(
-                                        author.getName(),
-                                        author.getAvatarUrl(),
-                                        null,
-                                        Color.YELLOW,
-                                        "Opened a ModMail session.",
-                                        null,
-                                        null,
-                                        null,
-                                        null
-                                    )
+                                    EmbedUtils.adminOpened(author)
                                 ).queue(
                                     // Delete command
                                     message -> msg.delete().queue(
@@ -128,17 +110,9 @@ public class InboxCommandListener extends ListenerAdapter {
                     ModMail.getInstance().error("Failed to delete message: " + error.getMessage());
                 }
             },
-            ignored -> msg.getChannel().sendMessageEmbeds(EmbedUtils.buildEmbed(
-                null,
-                null,
-                "Invalid User ID",
-                Color.RED,
-                null,
-                null,
-                null,
-                null,
-                null
-            )).queue(
+            ignored -> msg.getChannel().sendMessageEmbeds(
+                EmbedUtils.invalidID()
+            ).queue(
                 null,
                 error -> ModMail.getInstance().error("Failed warn invalid ID: " + error.getMessage())
             )
@@ -178,14 +152,14 @@ public class InboxCommandListener extends ListenerAdapter {
                             msg.getAuthor(),
                             content,
                             privateChannel,
-                            Color.GREEN,
+                            ColorUtils.forwardToUser(),
                             // Forward attachments to private ModMail channel
                             ((Consumer<Message>) privateMessage -> EmbedUtils.forwardAttachments(
                                 privateMessage,
                                 msg.getAuthor(),
                                 List.of(privateChannel),
                                 msg.getAttachments(),
-                                Color.GREEN,
+                                ColorUtils.forwardToUser(),
                                 "Staff",
                                 msg.getTimeCreated()
                             )).andThen(
@@ -194,14 +168,14 @@ public class InboxCommandListener extends ListenerAdapter {
                                     msg.getAuthor(),
                                     content,
                                     inboxChannel,
-                                    Color.GREEN,
+                                    ColorUtils.forwardToUser(),
                                     // Forward attachments to inbox ModMail channel
                                     inboxMessage -> EmbedUtils.forwardAttachments(
                                         inboxMessage,
                                         msg.getAuthor(),
                                         List.of(inboxChannel),
                                         msg.getAttachments(),
-                                        Color.GREEN,
+                                        ColorUtils.forwardToUser(),
                                         "Staff",
                                         msg.getTimeCreated()
                                     ),
@@ -224,17 +198,9 @@ public class InboxCommandListener extends ListenerAdapter {
                     ModMail.getInstance().error("Failed to delete: " + error.getMessage());
                 }
             },
-            ignored -> msg.getChannel().sendMessageEmbeds(EmbedUtils.buildEmbed(
-                null,
-                null,
-                "Invalid User ID",
-                Color.RED,
-                null,
-                null,
-                null,
-                null,
-                null
-            )).queue(
+            ignored -> msg.getChannel().sendMessageEmbeds(
+                EmbedUtils.invalidID()
+            ).queue(
                 null,
                 error -> ModMail.getInstance().error("Failed warn invalid ID: " + error.getMessage())
             )
@@ -260,17 +226,7 @@ public class InboxCommandListener extends ListenerAdapter {
                 // Log closing
                 LogUtils.log(u.getId(), "Staff", msg.getAuthor().getName(), msg.getAuthor().getId(), "[Closed thread]");
 
-                MessageEmbed embed = EmbedUtils.buildEmbed(
-                    msg.getAuthor().getName(),
-                    msg.getAuthor().getAvatarUrl(),
-                    "Thread Closed",
-                    Color.RED,
-                    null,
-                    "Staff",
-                    msg.getTimeCreated(),
-                    null,
-                    null
-                );
+                MessageEmbed embed = EmbedUtils.close(msg.getAuthor(), "Staff", msg.getTimeCreated());
                 // Inform inbox
                 inboxChannel.sendMessageEmbeds(embed).queue(
                     message -> ModMail.getInstance().getModMail(
@@ -287,17 +243,9 @@ public class InboxCommandListener extends ListenerAdapter {
                                 // Error logging
                                 error1 -> {
                                     ModMail.getInstance().error("Failed to close ModMail of " + u.getId() + ": " + error1.getMessage());
-                                    inboxChannel.sendMessageEmbeds(EmbedUtils.buildEmbed(
-                                        null,
-                                        null,
-                                        "Failed to close channel.",
-                                        Color.RED,
-                                        null,
-                                        null,
-                                        null,
-                                        null,
-                                        null
-                                    )).queue(
+                                    inboxChannel.sendMessageEmbeds(
+                                        EmbedUtils.closeFailed()
+                                    ).queue(
                                         null,
                                         error2 -> ModMail.getInstance().error("Failed to inform inbox of close failure: " + error2.getMessage())
                                     );
@@ -330,91 +278,24 @@ public class InboxCommandListener extends ListenerAdapter {
             );
             return;
         }
-
         // Author is a moderator with permission to block a user
+
         String userID = msg.getContentStripped().substring(1).split(" ")[1];
         ModMail.getInstance().getUserbyID(
             userID,
             u -> {
-                if(Blocked.block(u)) {
-                    msg.getChannel().sendMessageEmbeds(EmbedUtils.buildEmbed(
-                        msg.getAuthor().getName(),
-                        msg.getAuthor().getAvatarUrl(),
-                        "Blocked user",
-                        Color.GREEN,
-                        "<@" + u.getId() + ">",
-                        null,
-                        null,
-                        null,
-                        null
-                    )).queue(
-                        message -> msg.delete().queue(
-                            null,
-                            error -> ModMail.getInstance().error("Failed to delete blocked: " + userID)
-                        ),
-                        error -> ModMail.getInstance().error("Failed to send blocked: " + msg)
-                    );
-                }
-                else {
-                    msg.getChannel().sendMessageEmbeds(EmbedUtils.buildEmbed(
-                        msg.getAuthor().getName(),
-                        msg.getAuthor().getAvatarUrl(),
-                        "Failed to block user",
-                        Color.RED,
-                        "<@" + u.getId() + ">",
-                        null,
-                        null,
-                        null,
-                        null
-                    )).queue(
-                        message -> msg.delete().queue(
-                            null,
-                            error -> ModMail.getInstance().error("Failed to delete blocked: " + userID)
-                        ),
-                        error -> ModMail.getInstance().error("Failed to send blocked: " + msg)
-                    );
-                }
+                if(Blocked.block(u))
+                    block(msg, u);
+                else
+                    blockFailed(msg, u);
             },
             unused -> {
                 User u = User.fromId(userID);
-                if(Blocked.block(u)) {
-                    msg.getChannel().sendMessageEmbeds(EmbedUtils.buildEmbed(
-                        msg.getAuthor().getName(),
-                        msg.getAuthor().getAvatarUrl(),
-                        "Blocked user",
-                        Color.GREEN,
-                        "<@" + u.getId() + ">",
-                        null,
-                        null,
-                        null,
-                        null
-                    )).queue(
-                        message -> msg.delete().queue(
-                            null,
-                            error -> ModMail.getInstance().error("Failed to delete blocked: " + userID)
-                        ),
-                        error -> ModMail.getInstance().error("Failed to send blocked: " + msg)
-                    );
-                }
-                else {
-                    msg.getChannel().sendMessageEmbeds(EmbedUtils.buildEmbed(
-                        msg.getAuthor().getName(),
-                        msg.getAuthor().getAvatarUrl(),
-                        "Failed to block user",
-                        Color.RED,
-                        "<@" + u.getId() + ">",
-                        null,
-                        null,
-                        null,
-                        null
-                    )).queue(
-                        message -> msg.delete().queue(
-                            null,
-                            error -> ModMail.getInstance().error("Failed to delete blocked: " + userID)
-                        ),
-                        error -> ModMail.getInstance().error("Failed to send blocked: " + msg)
-                    );
-                }
+
+                if(Blocked.block(u))
+                    block(msg, u);
+                else
+                    blockFailed(msg, u);
             }
         );
     }
@@ -431,97 +312,37 @@ public class InboxCommandListener extends ListenerAdapter {
         }
         if(!isModerator(author, Settings.MODERATOR_ROLES)) {
             msg.delete().queue(
-                    null,
-                    error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage())
+                null,
+                error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage())
             );
             return;
         }
-
         // Author is a moderator with permission to unblock a user
+
         String userID = msg.getContentStripped().substring(1).split(" ")[1];
         ModMail.getInstance().getUserbyID(
             userID,
             u -> {
-                if(Blocked.unblock(u)) {
-                    msg.getChannel().sendMessageEmbeds(EmbedUtils.buildEmbed(
-                        msg.getAuthor().getName(),
-                        msg.getAuthor().getAvatarUrl(),
-                        "Unblocked user",
-                        Color.GREEN,
-                        "<@" + u.getId() + ">",
-                        null,
-                        null,
-                        null,
-                        null
-                    )).queue(
-                        message -> msg.delete().queue(
-                            null,
-                            error -> ModMail.getInstance().error("Failed to delete unblocked: " + userID)
-                        ),
-                        error -> ModMail.getInstance().error("Failed to send unblocked: " + msg)
-                    );
-                }
-                else {
-                    msg.getChannel().sendMessageEmbeds(EmbedUtils.buildEmbed(
-                        msg.getAuthor().getName(),
-                        msg.getAuthor().getAvatarUrl(),
-                        "Failed to unblock user",
-                        Color.RED,
-                        "<@" + u.getId() + ">",
-                        null,
-                        null,
-                        null,
-                        null
-                    )).queue(
-                        message -> msg.delete().queue(
-                            null,
-                            error -> ModMail.getInstance().error("Failed to delete unblocked: " + userID)
-                        ),
-                        error -> ModMail.getInstance().error("Failed to send unblocked: " + msg)
-                    );
-                }
+                if(Blocked.unblock(u))
+                    unblock(msg, u);
+                else
+                    unblockFailed(msg, u);
             },
             unused -> {
                 User u = User.fromId(userID);
-                if(Blocked.unblock(u)) {
-                    msg.getChannel().sendMessageEmbeds(EmbedUtils.buildEmbed(
-                        msg.getAuthor().getName(),
-                        msg.getAuthor().getAvatarUrl(),
-                        "Unblocked user",
-                        Color.GREEN,
-                        "<@" + u.getId() + ">",
-                        null,
-                        null,
-                        null,
-                        null
-                    )).queue(
-                        message -> msg.delete().queue(
-                            null,
-                            error -> ModMail.getInstance().error("Failed to delete unblocked: " + userID)
-                        ),
-                        error -> ModMail.getInstance().error("Failed to send unblocked: " + msg)
-                    );
-                }
-                else {
-                    msg.getChannel().sendMessageEmbeds(EmbedUtils.buildEmbed(
-                        msg.getAuthor().getName(),
-                        msg.getAuthor().getAvatarUrl(),
-                        "Failed to unblock user",
-                        Color.RED,
-                        "<@" + u.getId() + ">",
-                        null,
-                        null,
-                        null,
-                        null
-                    )).queue(
-                        message -> msg.delete().queue(
-                            null,
-                            error -> ModMail.getInstance().error("Failed to delete unblocked: " + userID)
-                        ),
-                        error -> ModMail.getInstance().error("Failed to send unblocked: " + msg)
-                    );
-                }
+
+                if(Blocked.unblock(u))
+                    unblock(msg, u);
+                else
+                    unblockFailed(msg, u);
             }
+        );
+    }
+
+    private void add(final @NotNull Message msg) {
+        msg.getChannel().sendMessageEmbeds(EmbedUtils.addError()).queue(
+            null,
+            error -> ModMail.getInstance().error("Failed to send add warning: " + error.getMessage())
         );
     }
 
@@ -535,17 +356,7 @@ public class InboxCommandListener extends ListenerAdapter {
 
     private void invalidInbox(final @NotNull TextChannel channel, final @NotNull Message msg) {
         try {
-            channel.sendMessageEmbeds(EmbedUtils.buildEmbed(
-                null,
-                null,
-                "This is not a ModMail inbox.",
-                Color.RED,
-                null,
-                null,
-                msg.getTimeCreated(),
-                null,
-                null
-            )).queue(
+            channel.sendMessageEmbeds(EmbedUtils.notInbox(msg.getTimeCreated())).queue(
                 message -> msg.delete().queue(
                     null,
                     error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage())
@@ -560,19 +371,7 @@ public class InboxCommandListener extends ListenerAdapter {
 
     private void invalidCommand(final @NotNull Message msg) {
         try {
-            msg.getChannel().sendMessageEmbeds(
-                EmbedUtils.buildEmbed(
-                    msg.getAuthor().getName(),
-                    msg.getAuthor().getAvatarUrl(),
-                    "Invalid command",
-                    Color.RED,
-                    msg.getContentDisplay(),
-                    null,
-                    null,
-                    null,
-                    null
-                )
-            ).queue(
+            msg.getChannel().sendMessageEmbeds(EmbedUtils.invalidCmd(msg)).queue(
                 message -> msg.delete().queue(
                     null,
                     error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage())
@@ -583,5 +382,57 @@ public class InboxCommandListener extends ListenerAdapter {
         catch (InsufficientPermissionException e) {
             ModMail.getInstance().error("Failed to send invalid command: " + e.getMessage());
         }
+    }
+
+    private void unblock(final @NotNull Message msg, final @NotNull User unblocked) {
+        // Send unblock message
+        msg.getChannel().sendMessageEmbeds(
+            EmbedUtils.unblocked(msg.getAuthor(), unblocked)
+        ).queue(
+            // Delete command
+            message -> msg.delete().queue(
+                null,
+                error -> ModMail.getInstance().error("Failed to delete unblocked: " + unblocked.getId())
+            ),
+            error -> ModMail.getInstance().error("Failed to send unblocked: " + msg)
+        );
+    }
+
+    private void unblockFailed(final @NotNull Message msg, final @NotNull User unblocked) {
+        // Send unblock failed message
+        msg.getChannel().sendMessageEmbeds(
+            EmbedUtils.unblockFailed(msg.getAuthor(), unblocked)
+        ).queue(
+            // Delete command
+            message -> msg.delete().queue(
+                null,
+                error -> ModMail.getInstance().error("Failed to delete unblocked: " + unblocked.getId())
+            ),
+            error -> ModMail.getInstance().error("Failed to send unblocked: " + msg)
+        );
+    }
+
+    private void block(final @NotNull Message msg, final @NotNull User blocked) {
+        msg.getChannel().sendMessageEmbeds(
+            EmbedUtils.blocked(msg.getAuthor(), blocked)
+        ).queue(
+            message -> msg.delete().queue(
+                null,
+                error -> ModMail.getInstance().error("Failed to delete blocked: " + blocked.getId())
+            ),
+            error -> ModMail.getInstance().error("Failed to send blocked: " + msg)
+        );
+    }
+
+    private void blockFailed(final @NotNull Message msg, final @NotNull User blocked) {
+        msg.getChannel().sendMessageEmbeds(
+            EmbedUtils.blockFailed(msg.getAuthor(), blocked)
+        ).queue(
+            message -> msg.delete().queue(
+                null,
+                error -> ModMail.getInstance().error("Failed to delete blocked: " + blocked.getId())
+            ),
+            error -> ModMail.getInstance().error("Failed to send blocked: " + msg)
+        );
     }
 }

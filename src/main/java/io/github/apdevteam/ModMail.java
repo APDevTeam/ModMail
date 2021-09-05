@@ -6,6 +6,7 @@ import io.github.apdevteam.listener.DirectMessageCommandListener;
 import io.github.apdevteam.listener.InboxCommandListener;
 import io.github.apdevteam.listener.DirectMessageListener;
 import io.github.apdevteam.listener.InboxListener;
+import io.github.apdevteam.utils.ColorUtils;
 import io.github.apdevteam.utils.EmbedUtils;
 import io.github.apdevteam.utils.LogUtils;
 import net.dv8tion.jda.api.JDA;
@@ -170,7 +171,7 @@ public class ModMail {
         logNow(
             "Successfully booted!" + (Settings.DEBUG ? "\n        DEBUG ENABLED" : ""),
             "v" + getClass().getPackage().getImplementationVersion(),
-            Color.GREEN
+            ColorUtils.startup()
         );
     }
 
@@ -181,7 +182,7 @@ public class ModMail {
         logNow(
             "Shutting down..." + (Settings.DEBUG ? "\n        DEBUG ENABLED" : ""),
             "v" + getClass().getPackage().getImplementationVersion(),
-            Color.RED
+            ColorUtils.shutdown()
         );
         jda.shutdown();
         jda = null;
@@ -189,7 +190,7 @@ public class ModMail {
     }
 
     public void log(String message) {
-        log(message, Color.BLUE);
+        log(message, ColorUtils.log());
     }
 
     public void log(@Nullable String message, @NotNull Color color) {
@@ -198,19 +199,11 @@ public class ModMail {
         if(logChannel == null)
             error("JDA is in an invalid state");
 
-        logChannel.sendMessageEmbeds(EmbedUtils.buildEmbed(
-                null,
-                null,
-                null,
-                color,
-                message,
-                null,
-                null,
-                null,
-                null
-        )).queue(
-                null,
-                error -> error(error.getMessage())
+        logChannel.sendMessageEmbeds(
+            EmbedUtils.log(null, color, message)
+        ).queue(
+            null,
+            error -> error(error.getMessage())
         );
     }
 
@@ -223,36 +216,20 @@ public class ModMail {
         if(logChannel == null)
             error("JDA is in an invalid state");
 
-        logChannel.sendMessageEmbeds(EmbedUtils.buildEmbed(
-            null,
-            null,
-            title,
-            color,
-            message,
-            null,
-            null,
-            null,
-            null
-        )).complete();
+        logChannel.sendMessageEmbeds(
+            EmbedUtils.log(title, color, message)
+        ).complete();
     }
 
-    public void error(String message) {
+    public void error(@NotNull String message) {
         System.err.println(message);
 
         if(logChannel == null)
             System.err.println("JDA is in an invalid state");
 
-        logChannel.sendMessageEmbeds(EmbedUtils.buildEmbed(
-            null,
-            null,
-            null,
-            Color.RED,
-            message,
-            null,
-            null,
-            null,
-            null
-        )).queue(
+        logChannel.sendMessageEmbeds(
+            EmbedUtils.error(message)
+        ).queue(
             null,
             error ->  {
                 System.err.println(error.getMessage());
@@ -329,17 +306,7 @@ public class ModMail {
                 (
                     // Then add initial message
                     (Consumer<TextChannel>) channel -> channel.sendMessageEmbeds(
-                        EmbedUtils.buildEmbed(
-                            user.getName(),
-                            user.getAvatarUrl(),
-                            null,
-                            Color.CYAN,
-                            "ModMail thread started.",
-                            "User ID: " + user.getId(),
-                            timestamp,
-                            user.getAvatarUrl(),
-                            null
-                        )
+                        EmbedUtils.inboxOpened(user, timestamp)
                     ).queue(
                         null,
                         error -> ModMail.getInstance().error("Failed to send initial message for '" + channel + "'")

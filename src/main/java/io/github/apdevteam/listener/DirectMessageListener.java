@@ -3,6 +3,7 @@ package io.github.apdevteam.listener;
 import io.github.apdevteam.ModMail;
 import io.github.apdevteam.config.Blocked;
 import io.github.apdevteam.config.Settings;
+import io.github.apdevteam.utils.ColorUtils;
 import io.github.apdevteam.utils.EmbedUtils;
 import io.github.apdevteam.utils.LogUtils;
 import net.dv8tion.jda.api.entities.*;
@@ -11,7 +12,6 @@ import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.*;
 import java.util.Collections;
 import java.util.function.Consumer;
 
@@ -22,6 +22,14 @@ public class DirectMessageListener extends ListenerAdapter {
         if(u.isBot() || u.getId().equals(Settings.TOKEN))
             return;
 
+        final Message msg = e.getMessage();
+
+        // Check for commands
+        String content = msg.getContentStripped();
+        if(content.startsWith(Settings.PREFIX)) {
+            return;
+        }
+
         boolean foundGuild = false;
         for(Guild g : u.getMutualGuilds()) {
             String id = g.getId();
@@ -30,13 +38,12 @@ public class DirectMessageListener extends ListenerAdapter {
                 break;
             }
         }
-        // Player is not in the guild, try to send an invite message
+        // Player is not in the guild, try to send an invitation message
         if(!foundGuild) {
             invite(e.getChannel(), u);
             return;
         }
 
-        final Message msg = e.getMessage();
         TextChannel modMailInbox = ModMail.getInstance().getModMailInbox(u);
         if(modMailInbox == null) {
             // Check for blocked
@@ -56,17 +63,7 @@ public class DirectMessageListener extends ListenerAdapter {
                         channel -> {
                             // Let player know
                             msg.getChannel().sendMessageEmbeds(
-                                EmbedUtils.buildEmbed(
-                                    null,
-                                    null,
-                                    "Thank you for your message!",
-                                    Color.GREEN,
-                                    "The AP Admin team will get back to you as soon as possible!",
-                                    null,
-                                    null,
-                                    null,
-                                    null
-                                )
+                                EmbedUtils.playerOpened()
                             ).queue(
                                 null,
                                 error -> ModMail.getInstance().error("Failed to send initial message for '" + channel + "'")
@@ -90,12 +87,6 @@ public class DirectMessageListener extends ListenerAdapter {
             return;
         }
 
-        // Check for commands
-        String content = msg.getContentStripped();
-        if(content.startsWith(Settings.PREFIX)) {
-            return;
-        }
-
         // Check for blocked
         if(Blocked.BLOCKED_IDS != null && Blocked.BLOCKED_IDS.contains(u.getId())) {
             blocked(e.getChannel(), u);
@@ -115,38 +106,16 @@ public class DirectMessageListener extends ListenerAdapter {
     }
 
     private void invite(final @NotNull PrivateChannel channel, final @NotNull User author) {
-        final MessageEmbed embed = EmbedUtils.buildEmbed(
+        channel.sendMessageEmbeds(EmbedUtils.invite()).queue(
             null,
-            null,
-            "Please join our discord server!",
-            Color.RED,
-            Settings.MAIN_INVITE,
-            null,
-            null,
-            null,
-            null
-        );
-        channel.sendMessageEmbeds(embed).queue(
-            null,
-            error -> ModMail.getInstance().error("Failed to send invite embed '" + embed + "' to '" + author + "'")
+            error -> ModMail.getInstance().error("Failed to send invite embed to '" + author + "'")
         );
     }
 
     private void blocked(final @NotNull PrivateChannel channel, final @NotNull User author) {
-        final MessageEmbed embed = EmbedUtils.buildEmbed(
+        channel.sendMessageEmbeds(EmbedUtils.blocked()).queue(
             null,
-            null,
-            "You are blocked from using the ModMail bot.",
-            Color.RED,
-            "Please appeal on our site: " + Blocked.APPEAL_LINK,
-            null,
-            null,
-            null,
-            null
-        );
-        channel.sendMessageEmbeds(embed).queue(
-            null,
-            error -> ModMail.getInstance().error("Failed to send blocked embed '" + embed + "' to '" + author + "'")
+            error -> ModMail.getInstance().error("Failed to send blocked embed to '" + author + "'")
         );
     }
 
@@ -155,14 +124,14 @@ public class DirectMessageListener extends ListenerAdapter {
             msg.getAuthor(),
             msg.getContentDisplay(),
             channel,
-            Color.YELLOW,
+            ColorUtils.forwardFromUser(),
             message -> msg.addReaction("U+2705").queue(
                 unused -> EmbedUtils.forwardAttachments(
                     message,
                     msg.getAuthor(),
                     Collections.singletonList(channel),
                     msg.getAttachments(),
-                    Color.YELLOW,
+                    ColorUtils.forwardFromUser(),
                     "User",
                     msg.getTimeCreated()
                 ),
