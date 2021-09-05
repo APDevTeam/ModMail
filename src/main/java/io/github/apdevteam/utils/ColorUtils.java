@@ -97,12 +97,12 @@ public class ColorUtils {
      */
     private static final @NotNull Color BRIGHT_BLUE = new Color(0xFF0000FF, true);
     /**
-     * #FFDE00
-     * CMYK: 0, 14, 100, 0
-     * RGB: 255, 222, 0
-     * HSV: 52, 100, 100
+     * #FFFF00
+     * CMYK: 0, 0, 100, 0
+     * RGB: 255, 255, 0
+     * HSV: 60, 100, 100
      */
-    private static final @NotNull Color BRIGHT_YELLOW = new Color(0xFFFFDE00, true);
+    private static final @NotNull Color BRIGHT_YELLOW = new Color(0xFFFFFF00, true);
 
 
     // Success
