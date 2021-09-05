@@ -422,8 +422,8 @@ public class EmbedUtils {
         return buildEmbed(
             null,
             null,
-            null,
-            ColorUtils.error(),
+            title,
+            color,
             message,
             null,
             null,
