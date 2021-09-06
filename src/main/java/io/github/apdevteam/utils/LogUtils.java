@@ -4,11 +4,9 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.function.Consumer;
@@ -77,7 +75,7 @@ public class LogUtils {
         try {
             BufferedWriter buffer = new BufferedWriter(new FileWriter(map, true));
             buffer.write(prefix);
-            buffer.write(new SimpleDateFormat("\t[MM/dd/yyyy HH:mm:ss] ").format(new Date()));
+            buffer.write("\t");
             buffer.write(sourceID);
             buffer.write(":");
             buffer.write(destinationID);
@@ -87,6 +85,41 @@ public class LogUtils {
             return false;
         }
         return true;
+    }
+
+    public static @Nullable String unmap(
+        @NotNull String userID,
+        @NotNull String prefix,
+        @NotNull String sourceID
+    ) {
+        File map = new File(".", baseFolder + "/" + userID + "." + mapExtension);
+        if(!map.exists() || !map.canRead() || !map.canWrite() || map.isDirectory())
+            return null;
+
+        String destination = null;
+        try {
+            BufferedReader buffer = new BufferedReader(new FileReader(map));
+
+            String line = buffer.readLine();
+            while(line != null) {
+                if(line.startsWith(prefix)) {
+                    line = line.substring(prefix.length() + 1);
+                    int i = line.indexOf(":");
+                    if(i != -1) {
+                        if(line.substring(0, i).equals(sourceID)) {
+                            destination = line.substring(i + 1);
+                            break;
+                        }
+                    }
+                }
+
+                line = buffer.readLine();
+            }
+            buffer.close();
+        } catch (IOException e) {
+            return null;
+        }
+        return destination;
     }
 
     public static void archive(

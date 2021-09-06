@@ -421,6 +421,20 @@ public class EmbedUtils {
         );
     }
 
+    public static @NotNull MessageEmbed deleted() {
+        return buildEmbed(
+            null,
+            null,
+            null,
+            ColorUtils.messageDeleted(),
+            "Message deleted",
+            null,
+            null,
+            null,
+            null
+        );
+    }
+
     public static @NotNull MessageEmbed log(@Nullable String title, @NotNull Color color, @Nullable String message) {
         return buildEmbed(
             null,

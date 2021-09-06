@@ -2,10 +2,7 @@ package io.github.apdevteam;
 
 import io.github.apdevteam.config.Blocked;
 import io.github.apdevteam.config.Settings;
-import io.github.apdevteam.listener.DirectMessageCommandListener;
-import io.github.apdevteam.listener.InboxCommandListener;
-import io.github.apdevteam.listener.DirectMessageListener;
-import io.github.apdevteam.listener.InboxListener;
+import io.github.apdevteam.listener.*;
 import io.github.apdevteam.utils.ColorUtils;
 import io.github.apdevteam.utils.EmbedUtils;
 import io.github.apdevteam.utils.LogUtils;
@@ -156,13 +153,14 @@ public class ModMail {
         File modmailFolder = new File(".", LogUtils.baseFolder);
         if(!modmailFolder.exists())
             if(!modmailFolder.mkdirs())
-                System.err.println("Failed to create modmail folder!");
+                System.err.println("Failed to create ModMail folder!");
         if(!modmailFolder.isDirectory())
-            System.err.println("Failed to create modmail folder!");
+            System.err.println("Failed to create ModMail folder!");
         if(!modmailFolder.exists())
-            System.err.println("Failed to create modmail folder!");
+            System.err.println("Failed to create ModMail folder!");
 
         jda.addEventListener(new DirectMessageCommandListener());
+        jda.addEventListener(new DirectMessageDeletedListener());
         jda.addEventListener(new DirectMessageListener());
         jda.addEventListener(new InboxCommandListener());
         jda.addEventListener(new InboxListener());
@@ -316,7 +314,7 @@ public class ModMail {
                     callback
                 )
             ),
-            (error) -> error("Failed to create channel for '" + user + "'")
+            error -> error("Failed to create channel for '" + user + "'")
         );
     }
 

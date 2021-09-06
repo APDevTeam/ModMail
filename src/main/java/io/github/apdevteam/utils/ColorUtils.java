@@ -135,6 +135,10 @@ public class ColorUtils {
         return DISCORD_FUCHSIA;
     }
 
+    public static @NotNull Color messageDeleted() {
+        return DISCORD_FUCHSIA;
+    }
+
     public static @NotNull Color beginModMail() {
         return DISCORD_ISH_CYAN;
     }
