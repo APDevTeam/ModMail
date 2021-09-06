@@ -396,18 +396,31 @@ public class EmbedUtils {
         );
     }
 
-    public static @NotNull MessageEmbed blockFailed(@NotNull User author, @NotNull User blocked) {
-        return buildEmbed(
-            author.getName(),
-            author.getAvatarUrl(),
-            "Failed to block user",
-            ColorUtils.blockFailed(),
-            "<@" + blocked.getId() + ">",
-            null,
-            null,
-            null,
-            null
-        );
+    public static @NotNull MessageEmbed blockFailed(@NotNull User author, @Nullable User blocked) {
+        if(blocked != null)
+            return buildEmbed(
+                author.getName(),
+                author.getAvatarUrl(),
+                "Failed to block user",
+                ColorUtils.blockFailed(),
+                "<@" + blocked.getId() + ">",
+                null,
+                null,
+                null,
+                null
+            );
+        else
+            return buildEmbed(
+                author.getName(),
+                author.getAvatarUrl(),
+                "Failed to block user",
+                ColorUtils.blockFailed(),
+                null,
+                null,
+                null,
+                null,
+                null
+            );
     }
 
     public static @NotNull MessageEmbed close(@NotNull User author, @Nullable String footer, @Nullable OffsetDateTime timestamp) {

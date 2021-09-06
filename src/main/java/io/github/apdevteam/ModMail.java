@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
+import net.dv8tion.jda.api.utils.MiscUtil;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -273,10 +274,16 @@ public class ModMail {
         if(jda == null)
             throw new IllegalStateException("JDA is in an invalid state");
 
-        jda.retrieveUserById(userID).queue(
-            success,
-            failure
-        );
+        try {
+            MiscUtil.parseSnowflake(userID);
+            jda.retrieveUserById(userID).queue(
+                success,
+                failure
+            );
+        } catch (NumberFormatException e) {
+            if(failure != null)
+                failure.accept(e);
+        }
     }
 
     public void createModMail(

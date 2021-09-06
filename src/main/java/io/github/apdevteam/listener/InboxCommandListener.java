@@ -16,6 +16,7 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -282,7 +283,20 @@ public class InboxCommandListener extends ListenerAdapter {
         }
         // Author is a moderator with permission to block a user
 
-        String userID = msg.getContentStripped().substring(1).split(" ")[1];
+        String userID = null;
+        try {
+            userID = msg.getContentStripped().substring(1).split(" ")[1];
+        } catch (ArrayIndexOutOfBoundsException e) {
+            blockFailed(msg, null);
+            return;
+        }
+        if(userID == null) {
+            // TODO: Handle the case where this is an inbox
+            blockFailed(msg, null);
+            return;
+        }
+
+        final String finalUserID = userID;
         ModMail.getInstance().getUserbyID(
             userID,
             u -> {
@@ -292,7 +306,13 @@ public class InboxCommandListener extends ListenerAdapter {
                     blockFailed(msg, u);
             },
             unused -> {
-                User u = User.fromId(userID);
+                User u;
+                try {
+                    u = User.fromId(finalUserID);
+                } catch (NumberFormatException e) {
+                    blockFailed(msg, null);
+                    return;
+                }
 
                 if(Blocked.block(u))
                     block(msg, u);
@@ -426,13 +446,13 @@ public class InboxCommandListener extends ListenerAdapter {
         );
     }
 
-    private void blockFailed(final @NotNull Message msg, final @NotNull User blocked) {
+    private void blockFailed(final @NotNull Message msg, final @Nullable User blocked) {
         msg.getChannel().sendMessageEmbeds(
             EmbedUtils.blockFailed(msg.getAuthor(), blocked)
         ).queue(
             message -> msg.delete().queue(
                 null,
-                error -> ModMail.getInstance().error("Failed to delete blocked: " + blocked.getId())
+                error -> ModMail.getInstance().error("Failed to delete blocked: " + msg)
             ),
             error -> ModMail.getInstance().error("Failed to send blocked: " + msg)
         );
