@@ -157,11 +157,12 @@ public class InboxCommandListener extends ListenerAdapter {
                             ((Consumer<Message>) privateMessage -> EmbedUtils.forwardAttachments(
                                 privateMessage,
                                 msg.getAuthor(),
-                                List.of(privateChannel),
+                                privateChannel,
                                 msg.getAttachments(),
                                 ColorUtils.forwardToUser(),
                                 "Staff",
-                                msg.getTimeCreated()
+                                msg.getTimeCreated(),
+                                null
                             )).andThen(
                                 // Forward text to inbox ModMail channel
                                 ((Consumer<Message>) message -> EmbedUtils.forwardText(
@@ -173,11 +174,12 @@ public class InboxCommandListener extends ListenerAdapter {
                                     inboxMessage -> EmbedUtils.forwardAttachments(
                                         inboxMessage,
                                         msg.getAuthor(),
-                                        List.of(inboxChannel),
+                                        inboxChannel,
                                         msg.getAttachments(),
                                         ColorUtils.forwardToUser(),
                                         "Staff",
-                                        msg.getTimeCreated()
+                                        msg.getTimeCreated(),
+                                        null
                                     ),
                                     "Staff",
                                     msg.getTimeCreated()

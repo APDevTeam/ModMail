@@ -58,7 +58,7 @@ public class DirectMessageListener extends ListenerAdapter {
                     msg.getTimeCreated(),
                     (
                         // Forward message to inbox
-                        (Consumer<TextChannel>) channel -> forward(msg, channel)
+                        (Consumer<TextChannel>) channel -> forward(msg, channel, u)
                     ).andThen(
                         channel -> {
                             // Let player know
@@ -102,7 +102,7 @@ public class DirectMessageListener extends ListenerAdapter {
         }
 
         // Forward message
-        forward(msg, modMailInbox);
+        forward(msg, modMailInbox, u);
     }
 
     private void invite(final @NotNull PrivateChannel channel, final @NotNull User author) {
@@ -119,26 +119,33 @@ public class DirectMessageListener extends ListenerAdapter {
         );
     }
 
-    private void forward(final @NotNull Message msg, final @NotNull TextChannel channel) {
+    private void forward(final @NotNull Message sourceMessage, final @NotNull TextChannel inboxChannel, final @NotNull User u) {
+        // Forward text to inbox
         EmbedUtils.forwardText(
-            msg.getAuthor(),
-            msg.getContentDisplay(),
-            channel,
+            sourceMessage.getAuthor(),
+            sourceMessage.getContentDisplay(),
+            inboxChannel,
             ColorUtils.forwardFromUser(),
-            message -> msg.addReaction("U+2705").queue(
-                unused -> EmbedUtils.forwardAttachments(
-                    message,
-                    msg.getAuthor(),
-                    Collections.singletonList(channel),
-                    msg.getAttachments(),
-                    ColorUtils.forwardFromUser(),
-                    "User",
-                    msg.getTimeCreated()
-                ),
-                error -> ModMail.getInstance().error("Failed to checkbox '" + msg + "' in '" + channel + "'")
+            // Forward attachments to inbox
+            destinationMessage -> EmbedUtils.forwardAttachments(
+                destinationMessage,
+                sourceMessage.getAuthor(),
+                inboxChannel,
+                sourceMessage.getAttachments(),
+                ColorUtils.forwardFromUser(),
+                "User",
+                sourceMessage.getTimeCreated(),
+                // Checkbox source message
+                success -> sourceMessage.addReaction("U+2705").queue(
+                    unused -> {
+                        if(!LogUtils.map(u.getId(), "Player", sourceMessage.getId(), destinationMessage.getId()))
+                            ModMail.getInstance().error("Failed to map '" + sourceMessage + "' to '" + destinationMessage + "'");
+                    },
+                    error -> ModMail.getInstance().error("Failed to checkbox '" + sourceMessage + "' in '" + inboxChannel + "'")
+                )
             ),
             "User",
-            msg.getTimeCreated()
+            sourceMessage.getTimeCreated()
         );
     }
 }

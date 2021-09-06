@@ -57,15 +57,15 @@ public class EmbedUtils {
         }
 
         MessageEmbed embed = EmbedUtils.buildEmbed(
-                user.getName(),
-                user.getAvatarUrl(),
-                null,
-                color,
-                msg,
-                footer,
-                timestamp,
-                null,
-                null
+            user.getName(),
+            user.getAvatarUrl(),
+            null,
+            color,
+            msg,
+            footer,
+            timestamp,
+            null,
+            null
         );
 
         channel.sendMessageEmbeds(embed).queue(
@@ -77,11 +77,12 @@ public class EmbedUtils {
     public static void forwardAttachments(
         final @NotNull Message main,
         final @NotNull User user,
-        final @NotNull Collection<MessageChannel> channels,
+        final @NotNull MessageChannel channel,
         final @NotNull List<Message.Attachment> attachments,
         @NotNull Color color,
         @NotNull String footer,
-        @NotNull OffsetDateTime timestamp
+        @NotNull OffsetDateTime timestamp,
+        @Nullable Consumer<Boolean> callback
     ) {
         if(attachments.size() < 1)
             return;
@@ -91,12 +92,12 @@ public class EmbedUtils {
             embeds.add(formatAttachment(user, a, color, footer, timestamp));
         }
 
-        for(MessageChannel channel : channels) {
-            channel.sendMessageEmbeds(embeds).reference(main).queue(
-                null,
-                error -> ModMail.getInstance().error("Failed to send attachments: " + error.getMessage())
-            );
-        }
+        channel.sendMessageEmbeds(embeds).reference(main).queue(
+            null,
+            error -> ModMail.getInstance().error("Failed to send attachments: " + error.getMessage())
+        );
+        if(callback != null)
+            callback.accept(true);
     }
 
     private static @NotNull MessageEmbed formatAttachment(
