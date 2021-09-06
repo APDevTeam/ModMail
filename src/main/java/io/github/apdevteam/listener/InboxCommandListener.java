@@ -283,20 +283,33 @@ public class InboxCommandListener extends ListenerAdapter {
         }
         // Author is a moderator with permission to block a user
 
-        String userID = null;
+        String userID;
         try {
             userID = msg.getContentStripped().substring(1).split(" ")[1];
         } catch (ArrayIndexOutOfBoundsException e) {
-            blockFailed(msg, null);
+            // No argument, try checking if this is an inbox
+            userID = msg.getTextChannel().getTopic();
+            if(userID == null) {
+                // Not an inbox, failed
+                blockFailed(msg, null);
+                return;
+            }
+
+            // Block user of the inbox
+            block(msg, userID);
             return;
         }
         if(userID == null) {
-            // TODO: Handle the case where this is an inbox
+            // Some sort of invalid issue here
             blockFailed(msg, null);
             return;
         }
 
-        final String finalUserID = userID;
+        block(msg, userID);
+    }
+
+    private void block(final @NotNull Message msg, final @NotNull String userID) {
+        // Try to retrieve the user via the Discord API
         ModMail.getInstance().getUserbyID(
             userID,
             u -> {
@@ -305,10 +318,11 @@ public class InboxCommandListener extends ListenerAdapter {
                 else
                     blockFailed(msg, u);
             },
+            // If that fails, try constructing it from the ID and blocking
             unused -> {
                 User u;
                 try {
-                    u = User.fromId(finalUserID);
+                    u = User.fromId(userID);
                 } catch (NumberFormatException e) {
                     blockFailed(msg, null);
                     return;
