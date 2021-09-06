@@ -74,6 +74,37 @@ public class EmbedUtils {
         );
     }
 
+    public static void edited(
+            final @NotNull User user,
+            final @NotNull String msg,
+            final @NotNull Message source,
+            final Consumer<Message> callback,
+            @NotNull String footer,
+            @NotNull OffsetDateTime timestamp
+    ) {
+        if ("".equals(msg)) {
+            callback.accept(null);
+            return; // Don't send empty text headers for attachment only messages
+        }
+
+        MessageEmbed embed = EmbedUtils.buildEmbed(
+            user.getName(),
+            user.getAvatarUrl(),
+            "Edited",
+            ColorUtils.messageEdited(),
+            msg,
+            footer,
+            timestamp,
+            null,
+            null
+        );
+
+        source.replyEmbeds(embed).queue(
+            callback,
+            error -> ModMail.getInstance().error("Failed to send '" + embed + "' in '" + source + "'")
+        );
+    }
+
     public static void forwardAttachments(
         final @NotNull Message main,
         final @NotNull User user,

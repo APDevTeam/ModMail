@@ -161,6 +161,7 @@ public class ModMail {
 
         jda.addEventListener(new DirectMessageCommandListener());
         jda.addEventListener(new DirectMessageDeletedListener());
+        jda.addEventListener(new DirectMessageEditedListener());
         jda.addEventListener(new DirectMessageListener());
         jda.addEventListener(new InboxCommandListener());
         jda.addEventListener(new InboxListener());
