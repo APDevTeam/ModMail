@@ -62,7 +62,7 @@ public class InboxCommandListener extends ListenerAdapter {
                 TextChannel textChannel = ModMail.getInstance().getModMailInbox(u);
                 if (textChannel != null) {
                     try {
-                        textChannel.sendMessageEmbeds(
+                        msg.getChannel().sendMessageEmbeds(
                             EmbedUtils.existingModMail()
                         ).queue(
                             message -> msg.delete().queue(
