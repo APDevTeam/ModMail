@@ -44,14 +44,14 @@ public class DirectMessageListener extends ListenerAdapter {
             return;
         }
 
+        // Check for blocked
+        if(Blocked.BLOCKED_IDS != null && Blocked.BLOCKED_IDS.contains(u.getId())) {
+            blocked(e.getChannel(), u);
+            return;
+        }
+
         TextChannel modMailInbox = ModMail.getInstance().getModMailInbox(u);
         if(modMailInbox == null) {
-            // Check for blocked
-            if(Blocked.BLOCKED_IDS != null && Blocked.BLOCKED_IDS.contains(u.getId())) {
-                blocked(e.getChannel(), u);
-                return;
-            }
-
             try { // Try creating a channel and forwarding the message
                 ModMail.getInstance().createModMail(
                     u,
@@ -84,12 +84,6 @@ public class DirectMessageListener extends ListenerAdapter {
                 ModMail.getInstance().error(exception.getMessage());
                 //exception.printStackTrace();
             }
-            return;
-        }
-
-        // Check for blocked
-        if(Blocked.BLOCKED_IDS != null && Blocked.BLOCKED_IDS.contains(u.getId())) {
-            blocked(e.getChannel(), u);
             return;
         }
 
@@ -136,8 +130,9 @@ public class DirectMessageListener extends ListenerAdapter {
                 "User",
                 sourceMessage.getTimeCreated(),
                 // Checkbox source message
-                success -> sourceMessage.addReaction("U+2705").queue(
-                    unused -> {
+                unused -> sourceMessage.addReaction("U+2705").queue(
+                    unused1 -> {
+                        // Log to map file
                         if(!LogUtils.map(u.getId(), "Player", sourceMessage.getId(), destinationMessage.getId()))
                             ModMail.getInstance().error("Failed to map '" + sourceMessage + "' to '" + destinationMessage + "'");
                     },

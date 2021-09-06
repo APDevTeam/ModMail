@@ -82,10 +82,14 @@ public class EmbedUtils {
         @NotNull Color color,
         @NotNull String footer,
         @NotNull OffsetDateTime timestamp,
-        @Nullable Consumer<Boolean> callback
+        @Nullable Consumer<Message> callback
     ) {
-        if(attachments.size() < 1)
+        if(attachments.size() < 1) {
+            if(callback != null)
+                callback.accept(null);
+
             return;
+        }
 
         ArrayList<MessageEmbed> embeds = new ArrayList<>();
         for(Message.Attachment a : attachments) {
@@ -93,11 +97,9 @@ public class EmbedUtils {
         }
 
         channel.sendMessageEmbeds(embeds).reference(main).queue(
-            null,
+            callback,
             error -> ModMail.getInstance().error("Failed to send attachments: " + error.getMessage())
         );
-        if(callback != null)
-            callback.accept(true);
     }
 
     private static @NotNull MessageEmbed formatAttachment(
