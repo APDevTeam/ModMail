@@ -153,7 +153,7 @@ public class ModMail {
             return;
         }
 
-        File modmailFolder = new File(".", LogUtils.folder);
+        File modmailFolder = new File(".", LogUtils.baseFolder);
         if(!modmailFolder.exists())
             if(!modmailFolder.mkdirs())
                 System.err.println("Failed to create modmail folder!");
