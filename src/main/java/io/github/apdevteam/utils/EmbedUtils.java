@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -106,7 +107,7 @@ public class EmbedUtils {
     }
 
     public static void forwardAttachments(
-        final @NotNull Message main,
+        final @Nullable Message main,
         final @NotNull User user,
         final @NotNull MessageChannel channel,
         final @NotNull List<Message.Attachment> attachments,
@@ -127,7 +128,11 @@ public class EmbedUtils {
             embeds.add(formatAttachment(user, a, color, footer, timestamp));
         }
 
-        channel.sendMessageEmbeds(embeds).reference(main).queue(
+        MessageAction action = channel.sendMessageEmbeds(embeds);
+        if(main != null)
+            action = action.reference(main);
+
+        action.queue(
             callback,
             error -> ModMail.getInstance().error("Failed to send attachments: " + error.getMessage())
         );
