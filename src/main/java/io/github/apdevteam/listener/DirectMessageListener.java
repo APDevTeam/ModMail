@@ -130,11 +130,15 @@ public class DirectMessageListener extends ListenerAdapter {
                 "User",
                 sourceMessage.getTimeCreated(),
                 // Checkbox source message
-                unused -> sourceMessage.addReaction("U+2705").queue(
+                embedMessage -> sourceMessage.addReaction("U+2705").queue(
                     unused1 -> {
                         // Log to map file
-                        if(!LogUtils.map(u.getId(), "Player", sourceMessage.getId(), destinationMessage.getId()))
-                            ModMail.getInstance().error("Failed to map '" + sourceMessage + "' to '" + destinationMessage + "'");
+                        Message msg = destinationMessage;
+                        if(destinationMessage == null)
+                            msg = embedMessage;
+
+                        if(!LogUtils.map(u.getId(), "Player", sourceMessage.getId(), msg.getId()))
+                            ModMail.getInstance().error("Failed to map '" + sourceMessage + "' to '" + msg + "'");
                     },
                     error -> ModMail.getInstance().error("Failed to checkbox '" + sourceMessage + "' in '" + inboxChannel + "'")
                 )
