@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Consumer;
 
 public class InboxCommandListener extends ListenerAdapter {
@@ -41,7 +42,7 @@ public class InboxCommandListener extends ListenerAdapter {
         if (!content.startsWith(Settings.PREFIX))
             return;
 
-        String command = content.substring(1).split(" ")[0];
+        String command = content.substring(1).split(" ")[0].toLowerCase(Locale.ROOT);
         switch (command) {
             case "open" -> open(msg);
             case "reply" -> reply(msg);

@@ -12,7 +12,6 @@ import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
 import java.util.function.Consumer;
 
 public class DirectMessageListener extends ListenerAdapter {

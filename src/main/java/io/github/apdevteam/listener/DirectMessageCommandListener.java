@@ -12,6 +12,8 @@ import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Locale;
+
 public class DirectMessageCommandListener extends ListenerAdapter {
     @Override
     public void onPrivateMessageReceived(@NotNull PrivateMessageReceivedEvent e) {
@@ -57,7 +59,7 @@ public class DirectMessageCommandListener extends ListenerAdapter {
             return;
         }
 
-        String command = content.substring(1).split(" ")[0];
+        String command = content.substring(1).split(" ")[0].toLowerCase(Locale.ROOT);
         switch (command) {
             case "add" -> add(msg);
             case "close" -> close(msg);
