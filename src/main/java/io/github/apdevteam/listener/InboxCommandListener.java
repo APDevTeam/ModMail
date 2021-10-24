@@ -90,7 +90,7 @@ public class InboxCommandListener extends ListenerAdapter {
                             u,
                             privateChannel -> {
                                 // Log message
-                                if(!LogUtils.log(u.getId(), "Staff", author.getName(), author.getId(), "[Opened thread]]"))
+                                if(!LogUtils.log(u.getId(), "Staff", author.getName(), author.getId(), "[Opened thread]"))
                                     ModMail.getInstance().error("Failed to log message '" + u + ": " + msg.getContentDisplay() + "'");
 
                                 // Inform player

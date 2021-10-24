@@ -253,6 +253,7 @@ public class ModMail {
             if(userID.equals(ch.getTopic()))
                 return ch;
         }
+        ModMail.getInstance().error("Failed to get '" +  userID + "' in \"" + inboxGuild.getTextChannels() + "\""); // TODO: Remove after debug is done
         return null;
     }
 
