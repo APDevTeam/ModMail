@@ -4,10 +4,10 @@ import io.github.apdevteam.ModMail;
 import io.github.apdevteam.config.Settings;
 import io.github.apdevteam.utils.EmbedUtils;
 import io.github.apdevteam.utils.LogUtils;
+import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageDeleteEvent;
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageUpdateEvent;
+import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,8 +15,10 @@ import java.time.OffsetDateTime;
 
 public class DirectMessageEditedListener extends ListenerAdapter {
     @Override
-    public void onPrivateMessageUpdate(@NotNull PrivateMessageUpdateEvent e) {
-        final User u = e.getChannel().getUser();
+    public void onMessageUpdate(@NotNull MessageUpdateEvent e) {
+        if(!e.isFromType(ChannelType.PRIVATE))
+            return;
+        final User u = e.getPrivateChannel().getUser();
         if(u.isBot() || u.getId().equals(Settings.TOKEN))
             return;
 

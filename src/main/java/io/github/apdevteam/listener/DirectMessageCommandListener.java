@@ -6,8 +6,15 @@ import io.github.apdevteam.config.Settings;
 import io.github.apdevteam.utils.ColorUtils;
 import io.github.apdevteam.utils.EmbedUtils;
 import io.github.apdevteam.utils.LogUtils;
-import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.PrivateChannel;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +23,9 @@ import java.util.Locale;
 
 public class DirectMessageCommandListener extends ListenerAdapter {
     @Override
-    public void onPrivateMessageReceived(@NotNull PrivateMessageReceivedEvent e) {
+    public void onMessageReceived(@NotNull MessageReceivedEvent e) {
+        if(!e.isFromType(ChannelType.PRIVATE))
+            return;
         final User u = e.getAuthor();
         if(u.isBot() || u.getId().equals(Settings.TOKEN))
             return;
@@ -43,13 +52,13 @@ public class DirectMessageCommandListener extends ListenerAdapter {
         }
         // Player is not in the guild, try to send an invitation message
         if(!foundGuild) {
-            invite(e.getChannel(), u);
+            invite(e.getPrivateChannel(), u);
             return;
         }
 
         // Check for blocked
         if(Blocked.BLOCKED_IDS != null && Blocked.BLOCKED_IDS.contains(u.getId())) {
-            blocked(e.getChannel(), u);
+            blocked(e.getPrivateChannel(), u);
             return;
         }
 

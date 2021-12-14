@@ -2,17 +2,20 @@ package io.github.apdevteam.listener;
 
 import io.github.apdevteam.config.Settings;
 import io.github.apdevteam.utils.LogUtils;
+import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.utils.MiscUtil;
 import org.jetbrains.annotations.NotNull;
 
 public class InboxListener extends ListenerAdapter {
     @Override
-    public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent e) {
+    public void onMessageReceived(@NotNull MessageReceivedEvent e) {
+        if(!e.isFromType(ChannelType.TEXT))
+            return;
         final User u = e.getAuthor();
         if (u.isBot() || u.getId().equals(Settings.TOKEN))
             return;
