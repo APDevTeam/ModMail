@@ -96,12 +96,12 @@
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>5.0.0-alpha.2</version>
+            <version>5.0.0-alpha.9</version>
         </dependency>
         <dependency>
             <groupId>com.electronwill.night-config</groupId>
             <artifactId>toml</artifactId>
-            <version>3.6.0</version>
+            <version>3.6.4</version>
         </dependency>
     </dependencies>
 </project>
