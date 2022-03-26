@@ -6,7 +6,7 @@
 
     <groupId>io.github.apdevteam</groupId>
     <artifactId>ModMail</artifactId>
-    <version>0.5.0</version>
+    <version>0.5.1</version>
     <packaging>jar</packaging>
 
     <properties>

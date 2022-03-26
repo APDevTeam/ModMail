@@ -50,6 +50,7 @@ public class InboxCommandListener extends ListenerAdapter {
             case "open" -> open(msg);
             case "reply" -> reply(msg);
             case "close" -> close(msg);
+            case "forceclose" -> forceClose(msg);
             case "block" -> block(msg);
             case "unblock" -> unblock(msg);
             case "add" -> add(msg);
@@ -243,10 +244,7 @@ public class InboxCommandListener extends ListenerAdapter {
                             // Archive channel
                             dm -> LogUtils.archive(u, ModMail.getInstance().getArchiveChannel(),
                                 // Delete channel
-                                unused -> inboxChannel.delete().queue(
-                                    null,
-                                    error -> ModMail.getInstance().error("Failed to delete channel: " + error.getMessage())
-                                ),
+                                null,
                                 // Error logging
                                 error1 -> {
                                     ModMail.getInstance().error("Failed to close ModMail of " + u.getId() + ": " + error1.getMessage());
@@ -259,6 +257,59 @@ public class InboxCommandListener extends ListenerAdapter {
                                 }
                             ),
                             error -> ModMail.getInstance().error("Failed to inform DM of close: " + error.getMessage())
+                        )
+                    ),
+                    error -> ModMail.getInstance().error("Failed to inform inbox of close: " + error.getMessage())
+                );
+            },
+            error -> ModMail.getInstance().error("Failed to get user for close: " + error.getMessage())
+        );
+    }
+
+    private void forceClose(final @NotNull Message msg) {
+        final TextChannel inboxChannel = msg.getTextChannel();
+        String userID = inboxChannel.getTopic();
+        if(userID == null) {
+            invalidInbox(inboxChannel, msg);
+            return;
+        }
+
+        ModMail.getInstance().getUserbyID(
+            userID,
+            u -> {
+                if (!u.getId().equals(inboxChannel.getTopic())) {
+                    invalidInbox(inboxChannel, msg);
+                    return;
+                }
+
+                // Log closing
+                LogUtils.log(u.getId(), "Staff", msg.getAuthor().getName(), msg.getAuthor().getId(), "[Closed thread]");
+
+                MessageEmbed embed = EmbedUtils.close(msg.getAuthor(), "Staff", msg.getTimeCreated());
+                // Inform inbox
+                inboxChannel.sendMessageEmbeds(embed).queue(
+                    message -> ModMail.getInstance().getModMail(
+                        u,
+                        // Archive channel
+                        privateChannel -> LogUtils.archive(u, ModMail.getInstance().getArchiveChannel(),
+                            // Delete channel
+                            unused -> inboxChannel.delete().queue(
+                                unused1 -> privateChannel.sendMessageEmbeds(embed).queue(
+                                    null,
+                                    error -> ModMail.getInstance().error("Failed to inform DM of close: " + error.getMessage())
+                                ),
+                                error -> ModMail.getInstance().error("Failed to delete channel: " + error.getMessage())
+                            ),
+                            // Error logging
+                            error1 -> {
+                                ModMail.getInstance().error("Failed to close ModMail of " + u.getId() + ": " + error1.getMessage());
+                                inboxChannel.sendMessageEmbeds(
+                                    EmbedUtils.closeFailed()
+                                ).queue(
+                                    null,
+                                    error2 -> ModMail.getInstance().error("Failed to inform inbox of close failure: " + error2.getMessage())
+                                );
+                            }
                         )
                     ),
                     error -> ModMail.getInstance().error("Failed to inform inbox of close: " + error.getMessage())
