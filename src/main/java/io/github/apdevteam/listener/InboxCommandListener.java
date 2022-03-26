@@ -283,7 +283,7 @@ public class InboxCommandListener extends ListenerAdapter {
                 }
 
                 // Log closing
-                LogUtils.log(u.getId(), "Staff", msg.getAuthor().getName(), msg.getAuthor().getId(), "[Closed thread]");
+                LogUtils.log(u.getId(), "Staff", msg.getAuthor().getName(), msg.getAuthor().getId(), "[Force Closed thread]");
 
                 MessageEmbed embed = EmbedUtils.close(msg.getAuthor(), "Staff", msg.getTimeCreated());
                 // Inform inbox

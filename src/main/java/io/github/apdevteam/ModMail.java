@@ -226,7 +226,7 @@ public class ModMail {
             System.err.println("JDA is in an invalid state");
 
         logChannel.sendMessageEmbeds(
-            EmbedUtils.error(message)
+            EmbedUtils.warn(message)
         ).queue(
             null,
             error -> error(error.getMessage())
