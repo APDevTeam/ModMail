@@ -221,6 +221,18 @@ public class ModMail {
         ).complete();
     }
 
+    public void warn(@NotNull String message) {
+        if(logChannel == null)
+            System.err.println("JDA is in an invalid state");
+
+        logChannel.sendMessageEmbeds(
+            EmbedUtils.error(message)
+        ).queue(
+            null,
+            error -> error(error.getMessage())
+        );
+    }
+
     public void error(@NotNull String message) {
         System.err.println(message);
 

@@ -498,6 +498,20 @@ public class EmbedUtils {
         );
     }
 
+    public static @NotNull MessageEmbed warn(@NotNull String message) {
+        return buildEmbed(
+            null,
+            null,
+            null,
+            ColorUtils.warn(),
+            message,
+            null,
+            null,
+            null,
+            null
+        );
+    }
+
     public static @NotNull MessageEmbed error(@NotNull String message) {
         return buildEmbed(
             null,

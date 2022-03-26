@@ -197,11 +197,15 @@ public class ColorUtils {
         return BRIGHT_RED;
     }
 
+    public static @NotNull Color debug() {
+        return BRIGHT_YELLOW;
+    }
+
     public static @NotNull Color log() {
         return BRIGHT_BLUE;
     }
 
-    public static @NotNull Color debug() {
+    public static @NotNull Color warn() {
         return BRIGHT_YELLOW;
     }
 

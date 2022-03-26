@@ -296,7 +296,7 @@ public class InboxCommandListener extends ListenerAdapter {
                             unused -> inboxChannel.delete().queue(
                                 unused1 -> privateChannel.sendMessageEmbeds(embed).queue(
                                     null,
-                                    error -> ModMail.getInstance().error("Failed to inform DM of close: " + error.getMessage())
+                                    error -> ModMail.getInstance().warn("Failed to inform DM of close: " + error.getMessage())
                                 ),
                                 error -> ModMail.getInstance().error("Failed to delete channel: " + error.getMessage())
                             ),
