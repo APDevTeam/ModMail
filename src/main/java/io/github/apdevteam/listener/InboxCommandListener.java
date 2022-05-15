@@ -19,14 +19,16 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.xml.datatype.Duration;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class InboxCommandListener extends ListenerAdapter {
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent e) {
-        if(!e.isFromType(ChannelType.TEXT))
+        if (!e.isFromType(ChannelType.TEXT))
             return;
         final User u = e.getAuthor();
         if (u.isBot() || u.getId().equals(Settings.TOKEN))
@@ -54,6 +56,7 @@ public class InboxCommandListener extends ListenerAdapter {
             case "block" -> block(msg);
             case "unblock" -> unblock(msg);
             case "add" -> add(msg);
+            case "remindme" -> remindMe(msg);
             default -> invalidCommand(msg);
         }
     }
@@ -524,6 +527,44 @@ public class InboxCommandListener extends ListenerAdapter {
                 error -> ModMail.getInstance().error("Failed to delete blocked: " + msg)
             ),
             error -> ModMail.getInstance().error("Failed to send blocked: " + msg)
+        );
+    }
+
+    private void remindMe(final @NotNull Message msg) {
+        String[] content = msg.getContentStripped().substring(1).split(" ");
+        long time = Long.parseLong(content[1]);
+        String unitName = null;
+        TimeUnit unit;
+        switch (content[2].toLowerCase()) {
+            case "y", "yr", "year", "years" -> {
+                unit = TimeUnit.DAYS;
+                unitName = "years";
+                time *= 365;
+            }
+            case "mo", "month", "months" -> {
+                unit = TimeUnit.DAYS;
+                unitName = "months";
+                time *= 30;
+            }
+            case "w", "week", "weeks" -> {
+                unit = TimeUnit.DAYS;
+                unitName = "weeks";
+                time *= 7;
+            }
+            case "d", "day", "days" -> unit = TimeUnit.DAYS;
+            case "h", "hr", "hour", "hours" -> unit = TimeUnit.HOURS;
+            case "m", "min", "mins", "minute", "minutes" -> unit = TimeUnit.MINUTES;
+            default -> unit = TimeUnit.SECONDS;
+        }
+        String replyMessage = "You will be reminded in " + time + " "
+                + (unitName == null ? unit.name().toLowerCase() : unitName) + ".";
+        msg.reply(replyMessage).mentionRepliedUser(false).queue(
+            null,
+            error -> ModMail.getInstance().error("Failed to send remind me: " + error.getMessage())
+        );
+        msg.reply("Reminder!").mentionRepliedUser(false).queueAfter(time, unit,
+            null,
+            error -> ModMail.getInstance().error("Failed to send reminder: " + error.getMessage())
         );
     }
 }
