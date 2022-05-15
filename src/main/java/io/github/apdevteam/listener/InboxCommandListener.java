@@ -536,6 +536,8 @@ public class InboxCommandListener extends ListenerAdapter {
         try {
             String[] content = msg.getContentStripped().substring(1).split(" ");
             long time = Long.parseLong(content[1]);
+            if (time < 1)
+                throw new IllegalArgumentException("Invalid time");
             TimeUnit unit;
             switch (content[2].toLowerCase()) {
                 case "w", "week", "weeks" -> {
@@ -548,9 +550,12 @@ public class InboxCommandListener extends ListenerAdapter {
                 case "s", "sec", "secs", "second", "seconds" -> unit = TimeUnit.SECONDS;
                 default -> throw new IllegalArgumentException("Invalid unit");
             }
+            String unitName = unit.name().toLowerCase();
+            if (time == 1)  // Remove plural
+                unitName = unitName.substring(0, unitName.length() - 1);
             msg.reply(
                     new MessageBuilder().setEmbeds(EmbedUtils.remind(
-                            "You will be reminded in " + time + " " + unit.name().toLowerCase() + "."
+                            "You will be reminded in " + time + " " + unitName + "."
                     )).build()
             ).mentionRepliedUser(false).queue(
                     null,
