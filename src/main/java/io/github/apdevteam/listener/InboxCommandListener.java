@@ -563,7 +563,9 @@ public class InboxCommandListener extends ListenerAdapter {
             );
         }
         catch (ArrayIndexOutOfBoundsException | IllegalArgumentException e) {
-            msg.reply(new MessageBuilder().setEmbeds(EmbedUtils.remindFailed()).build()).queue(
+            msg.reply(
+                    new MessageBuilder().setEmbeds(EmbedUtils.remindFailed()).build()
+            ).mentionRepliedUser(false).queue(
                 null,
                 error -> ModMail.getInstance().error("Failed to send remind failed: " + error.getMessage())
             );
