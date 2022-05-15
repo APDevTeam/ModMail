@@ -57,7 +57,8 @@ public class InboxCommandListener extends ListenerAdapter {
             case "block" -> block(msg);
             case "unblock" -> unblock(msg);
             case "add" -> add(msg);
-            case "remindme" -> remindMe(msg);
+            case "remindme" -> remindMe(msg, false);
+            case "remind" -> remindMe(msg, true);
             default -> invalidCommand(msg);
         }
     }
@@ -531,7 +532,7 @@ public class InboxCommandListener extends ListenerAdapter {
         );
     }
 
-    private void remindMe(final @NotNull Message msg) {
+    private void remindMe(final @NotNull Message msg, boolean ping) {
         try {
             String[] content = msg.getContentStripped().substring(1).split(" ");
             long time = Long.parseLong(content[1]);
@@ -557,7 +558,7 @@ public class InboxCommandListener extends ListenerAdapter {
             );
             msg.reply(
                     new MessageBuilder().setEmbeds(EmbedUtils.remind("Reminder!")).build()
-            ).mentionRepliedUser(false).queueAfter(time, unit,
+            ).mentionRepliedUser(ping).queueAfter(time, unit,
                     null,
                     error -> ModMail.getInstance().error("Failed to send reminder: " + error.getMessage())
             );
