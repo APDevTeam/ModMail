@@ -536,16 +536,6 @@ public class InboxCommandListener extends ListenerAdapter {
         String unitName = null;
         TimeUnit unit;
         switch (content[2].toLowerCase()) {
-            case "y", "yr", "year", "years" -> {
-                unit = TimeUnit.DAYS;
-                unitName = "years";
-                time *= 365;
-            }
-            case "mo", "month", "months" -> {
-                unit = TimeUnit.DAYS;
-                unitName = "months";
-                time *= 30;
-            }
             case "w", "week", "weeks" -> {
                 unit = TimeUnit.DAYS;
                 unitName = "weeks";
