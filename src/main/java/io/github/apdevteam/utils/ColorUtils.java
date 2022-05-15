@@ -2,7 +2,7 @@ package io.github.apdevteam.utils;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.*;
+import java.awt.Color;
 
 public class ColorUtils {
     // Discord Colors
@@ -147,6 +147,10 @@ public class ColorUtils {
         return DISCORD_ISH_CYAN;
     }
 
+    public static @NotNull Color remind() {
+        return DISCORD_YELLOW;
+    }
+
     public static @NotNull Color closeModMail() {
         return DISCORD_RED;
     }
@@ -165,6 +169,10 @@ public class ColorUtils {
     }
 
     public static @NotNull Color blockFailed() {
+        return DISCORD_RED;
+    }
+
+    public static @NotNull Color remindFailed() {
         return DISCORD_RED;
     }
 

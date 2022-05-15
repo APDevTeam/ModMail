@@ -6,6 +6,7 @@ import io.github.apdevteam.config.Settings;
 import io.github.apdevteam.utils.ColorUtils;
 import io.github.apdevteam.utils.EmbedUtils;
 import io.github.apdevteam.utils.LogUtils;
+import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
@@ -531,30 +532,41 @@ public class InboxCommandListener extends ListenerAdapter {
     }
 
     private void remindMe(final @NotNull Message msg) {
-        String[] content = msg.getContentStripped().substring(1).split(" ");
-        long time = Long.parseLong(content[1]);
-        String unitName = null;
-        TimeUnit unit;
-        switch (content[2].toLowerCase()) {
-            case "w", "week", "weeks" -> {
-                unit = TimeUnit.DAYS;
-                unitName = "weeks";
-                time *= 7;
+        try {
+            String[] content = msg.getContentStripped().substring(1).split(" ");
+            long time = Long.parseLong(content[1]);
+            TimeUnit unit;
+            switch (content[2].toLowerCase()) {
+                case "w", "week", "weeks" -> {
+                    unit = TimeUnit.DAYS;
+                    time *= 7;
+                }
+                case "d", "day", "days" -> unit = TimeUnit.DAYS;
+                case "h", "hr", "hour", "hours" -> unit = TimeUnit.HOURS;
+                case "m", "min", "mins", "minute", "minutes" -> unit = TimeUnit.MINUTES;
+                case "s", "sec", "secs", "second", "seconds" -> unit = TimeUnit.SECONDS;
+                default -> throw new IllegalArgumentException("Invalid unit");
             }
-            case "d", "day", "days" -> unit = TimeUnit.DAYS;
-            case "h", "hr", "hour", "hours" -> unit = TimeUnit.HOURS;
-            case "m", "min", "mins", "minute", "minutes" -> unit = TimeUnit.MINUTES;
-            default -> unit = TimeUnit.SECONDS;
+            msg.reply(
+                    new MessageBuilder().setEmbeds(EmbedUtils.remind(
+                            "You will be reminded in " + time + " " + unit.name().toLowerCase() + "."
+                    )).build()
+            ).mentionRepliedUser(false).queue(
+                    null,
+                    error -> ModMail.getInstance().error("Failed to send remind msg: " + error.getMessage())
+            );
+            msg.reply(
+                    new MessageBuilder().setEmbeds(EmbedUtils.remind("Reminder!")).build()
+            ).mentionRepliedUser(false).queueAfter(time, unit,
+                    null,
+                    error -> ModMail.getInstance().error("Failed to send reminder: " + error.getMessage())
+            );
         }
-        String replyMessage = "You will be reminded in " + time + " "
-                + (unitName == null ? unit.name().toLowerCase() : unitName) + ".";
-        msg.reply(replyMessage).mentionRepliedUser(false).queue(
-            null,
-            error -> ModMail.getInstance().error("Failed to send remind me: " + error.getMessage())
-        );
-        msg.reply("Reminder!").mentionRepliedUser(false).queueAfter(time, unit,
-            null,
-            error -> ModMail.getInstance().error("Failed to send reminder: " + error.getMessage())
-        );
+        catch (ArrayIndexOutOfBoundsException | IllegalArgumentException e) {
+            msg.reply(new MessageBuilder().setEmbeds(EmbedUtils.remindFailed()).build()).queue(
+                null,
+                error -> ModMail.getInstance().error("Failed to send remind failed: " + error.getMessage())
+            );
+        }
     }
 }

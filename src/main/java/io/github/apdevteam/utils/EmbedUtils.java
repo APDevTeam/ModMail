@@ -429,6 +429,34 @@ public class EmbedUtils {
             );
     }
 
+    public static @NotNull MessageEmbed remind(@NotNull String message) {
+        return buildEmbed(
+            null,
+            null,
+            message,
+            ColorUtils.remind(),
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+    }
+
+    public static @NotNull MessageEmbed remindFailed() {
+        return buildEmbed(
+            null,
+            null,
+            "Failure to parse command",
+            ColorUtils.remindFailed(),
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+    }
+
     public static @NotNull MessageEmbed close(@NotNull User author, @Nullable String footer, @Nullable OffsetDateTime timestamp) {
         return buildEmbed(
             author.getName(),
