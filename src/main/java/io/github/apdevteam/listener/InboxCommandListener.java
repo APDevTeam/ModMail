@@ -13,13 +13,13 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.xml.datatype.Duration;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -378,18 +378,18 @@ public class InboxCommandListener extends ListenerAdapter {
             },
             // If that fails, try constructing it from the ID and blocking
             unused -> {
-                User u;
+                UserSnowflake userSnowflake;
                 try {
-                    u = User.fromId(userID);
+                    userSnowflake = User.fromId(userID);
                 } catch (NumberFormatException e) {
                     blockFailed(msg, null);
                     return;
                 }
 
-                if(Blocked.block(u))
-                    block(msg, u);
+                if(Blocked.block(userSnowflake))
+                    block(msg, userSnowflake);
                 else
-                    blockFailed(msg, u);
+                    blockFailed(msg, userSnowflake);
             }
         );
     }
@@ -423,12 +423,12 @@ public class InboxCommandListener extends ListenerAdapter {
                     unblockFailed(msg, u);
             },
             unused -> {
-                User u = User.fromId(userID);
+                UserSnowflake userSnowflake = User.fromId(userID);
 
-                if(Blocked.unblock(u))
-                    unblock(msg, u);
+                if(Blocked.unblock(userSnowflake))
+                    unblock(msg, userSnowflake);
                 else
-                    unblockFailed(msg, u);
+                    unblockFailed(msg, userSnowflake);
             }
         );
     }
@@ -478,7 +478,7 @@ public class InboxCommandListener extends ListenerAdapter {
         }
     }
 
-    private void unblock(final @NotNull Message msg, final @NotNull User unblocked) {
+    private void unblock(final @NotNull Message msg, final @NotNull UserSnowflake unblocked) {
         // Send unblock message
         msg.getChannel().sendMessageEmbeds(
             EmbedUtils.unblocked(msg.getAuthor(), unblocked)
@@ -492,7 +492,7 @@ public class InboxCommandListener extends ListenerAdapter {
         );
     }
 
-    private void unblockFailed(final @NotNull Message msg, final @NotNull User unblocked) {
+    private void unblockFailed(final @NotNull Message msg, final @NotNull UserSnowflake unblocked) {
         // Send unblock failed message
         msg.getChannel().sendMessageEmbeds(
             EmbedUtils.unblockFailed(msg.getAuthor(), unblocked)
@@ -506,7 +506,7 @@ public class InboxCommandListener extends ListenerAdapter {
         );
     }
 
-    private void block(final @NotNull Message msg, final @NotNull User blocked) {
+    private void block(final @NotNull Message msg, final @NotNull UserSnowflake blocked) {
         msg.getChannel().sendMessageEmbeds(
             EmbedUtils.blocked(msg.getAuthor(), blocked)
         ).queue(
@@ -518,7 +518,7 @@ public class InboxCommandListener extends ListenerAdapter {
         );
     }
 
-    private void blockFailed(final @NotNull Message msg, final @Nullable User blocked) {
+    private void blockFailed(final @NotNull Message msg, final @Nullable UserSnowflake blocked) {
         msg.getChannel().sendMessageEmbeds(
             EmbedUtils.blockFailed(msg.getAuthor(), blocked)
         ).queue(

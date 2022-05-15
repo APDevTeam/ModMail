@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -359,7 +360,7 @@ public class EmbedUtils {
         );
     }
 
-    public static @NotNull MessageEmbed unblocked(@NotNull User author, @NotNull User unblocked) {
+    public static @NotNull MessageEmbed unblocked(@NotNull User author, @NotNull UserSnowflake unblocked) {
         return buildEmbed(
             author.getName(),
             author.getAvatarUrl(),
@@ -373,7 +374,7 @@ public class EmbedUtils {
         );
     }
 
-    public static @NotNull MessageEmbed unblockFailed(@NotNull User author, @NotNull User unblocked) {
+    public static @NotNull MessageEmbed unblockFailed(@NotNull User author, @NotNull UserSnowflake unblocked) {
         return buildEmbed(
             author.getName(),
             author.getAvatarUrl(),
@@ -387,7 +388,7 @@ public class EmbedUtils {
         );
     }
 
-    public static @NotNull MessageEmbed blocked(@NotNull User author, @NotNull User blocked) {
+    public static @NotNull MessageEmbed blocked(@NotNull User author, @NotNull UserSnowflake blocked) {
         return buildEmbed(
             author.getName(),
             author.getAvatarUrl(),
@@ -401,7 +402,7 @@ public class EmbedUtils {
         );
     }
 
-    public static @NotNull MessageEmbed blockFailed(@NotNull User author, @Nullable User blocked) {
+    public static @NotNull MessageEmbed blockFailed(@NotNull User author, @Nullable UserSnowflake blocked) {
         if(blocked != null)
             return buildEmbed(
                 author.getName(),

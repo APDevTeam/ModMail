@@ -3,7 +3,7 @@ package io.github.apdevteam.config;
 import com.electronwill.nightconfig.core.ConfigSpec;
 import com.electronwill.nightconfig.core.file.FileConfig;
 import com.electronwill.nightconfig.core.file.FileConfigBuilder;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.utils.MiscUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -103,7 +103,7 @@ public class Blocked {
         };
     }
 
-    public static boolean block(@NotNull User u) {
+    public static boolean block(@NotNull UserSnowflake u) {
         if(BLOCKED_IDS == null)
             return false;
 
@@ -122,7 +122,7 @@ public class Blocked {
         return true;
     }
 
-    public static boolean unblock(@NotNull User u) {
+    public static boolean unblock(@NotNull UserSnowflake u) {
         if(BLOCKED_IDS == null)
             return false;
 
