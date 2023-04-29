@@ -6,14 +6,14 @@ import io.github.apdevteam.config.Settings;
 import io.github.apdevteam.utils.ColorUtils;
 import io.github.apdevteam.utils.EmbedUtils;
 import io.github.apdevteam.utils.LogUtils;
-import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.PrivateChannel;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -51,14 +51,15 @@ public class DirectMessageCommandListener extends ListenerAdapter {
             }
         }
         // Player is not in the guild, try to send an invitation message
+        PrivateChannel privateChannel = (PrivateChannel) e.getChannel();
         if(!foundGuild) {
-            invite(e.getPrivateChannel(), u);
+            invite(privateChannel, u);
             return;
         }
 
         // Check for blocked
         if(Blocked.BLOCKED_IDS != null && Blocked.BLOCKED_IDS.contains(u.getId())) {
-            blocked(e.getPrivateChannel(), u);
+            blocked(privateChannel, u);
             return;
         }
 
@@ -129,7 +130,7 @@ public class DirectMessageCommandListener extends ListenerAdapter {
     private void close(final @NotNull Message msg) {
         final User u = msg.getAuthor();
         TextChannel inboxChannel = ModMail.getInstance().getModMailInbox(u);
-        MessageChannel privateChannel = msg.getPrivateChannel();
+        MessageChannel privateChannel = msg.getChannel();
         if(inboxChannel == null) {
             msg.getChannel().sendMessageEmbeds(
                 EmbedUtils.closeFailed()

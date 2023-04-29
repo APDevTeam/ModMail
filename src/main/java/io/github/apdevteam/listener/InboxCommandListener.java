@@ -6,18 +6,19 @@ import io.github.apdevteam.config.Settings;
 import io.github.apdevteam.utils.ColorUtils;
 import io.github.apdevteam.utils.EmbedUtils;
 import io.github.apdevteam.utils.LogUtils;
-import net.dv8tion.jda.api.MessageBuilder;
-import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.UserSnowflake;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -131,7 +132,7 @@ public class InboxCommandListener extends ListenerAdapter {
     }
 
     private void reply(final @NotNull Message msg) {
-        final TextChannel inboxChannel = msg.getTextChannel();
+        final TextChannel inboxChannel = (TextChannel) msg.getChannel();
         String userID = inboxChannel.getTopic();
         if(userID == null) {
             invalidInbox(inboxChannel, msg);
@@ -221,7 +222,7 @@ public class InboxCommandListener extends ListenerAdapter {
     }
 
     private void close(final @NotNull Message msg) {
-        final TextChannel inboxChannel = msg.getTextChannel();
+        final TextChannel inboxChannel = (TextChannel) msg.getChannel();
         String userID = inboxChannel.getTopic();
         if(userID == null) {
             invalidInbox(inboxChannel, msg);
@@ -272,7 +273,7 @@ public class InboxCommandListener extends ListenerAdapter {
     }
 
     private void forceClose(final @NotNull Message msg) {
-        final TextChannel inboxChannel = msg.getTextChannel();
+        final TextChannel inboxChannel = (TextChannel) msg.getChannel();
         String userID = inboxChannel.getTopic();
         if(userID == null) {
             invalidInbox(inboxChannel, msg);
@@ -348,7 +349,7 @@ public class InboxCommandListener extends ListenerAdapter {
             userID = msg.getContentStripped().substring(1).split(" ")[1];
         } catch (ArrayIndexOutOfBoundsException e) {
             // No argument, try checking if this is an inbox
-            userID = msg.getTextChannel().getTopic();
+            userID = ((TextChannel) msg.getChannel()).getTopic();
             if(userID == null) {
                 // Not an inbox, failed
                 blockFailed(msg, null);
@@ -554,7 +555,7 @@ public class InboxCommandListener extends ListenerAdapter {
             if (time == 1)  // Remove plural
                 unitName = unitName.substring(0, unitName.length() - 1);
             msg.reply(
-                    new MessageBuilder().setEmbeds(EmbedUtils.remind(
+                    new MessageCreateBuilder().setEmbeds(EmbedUtils.remind(
                             "You will be reminded in " + time + " " + unitName + "."
                     )).build()
             ).mentionRepliedUser(false).queue(
@@ -562,7 +563,7 @@ public class InboxCommandListener extends ListenerAdapter {
                     error -> ModMail.getInstance().error("Failed to send remind msg: " + error.getMessage())
             );
             msg.reply(
-                    new MessageBuilder().setEmbeds(EmbedUtils.remind("Reminder!")).build()
+                    new MessageCreateBuilder().setEmbeds(EmbedUtils.remind("Reminder!")).build()
             ).mentionRepliedUser(ping).queueAfter(time, unit,
                     null,
                     error -> ModMail.getInstance().error("Failed to send reminder: " + error.getMessage())
@@ -570,7 +571,7 @@ public class InboxCommandListener extends ListenerAdapter {
         }
         catch (ArrayIndexOutOfBoundsException | IllegalArgumentException e) {
             msg.reply(
-                    new MessageBuilder().setEmbeds(EmbedUtils.remindFailed()).build()
+                    new MessageCreateBuilder().setEmbeds(EmbedUtils.remindFailed()).build()
             ).mentionRepliedUser(false).queue(
                 null,
                 error -> ModMail.getInstance().error("Failed to send remind failed: " + error.getMessage())

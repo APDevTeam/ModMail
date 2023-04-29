@@ -7,6 +7,10 @@ import io.github.apdevteam.utils.ColorUtils;
 import io.github.apdevteam.utils.EmbedUtils;
 import io.github.apdevteam.utils.LogUtils;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -40,14 +44,15 @@ public class DirectMessageListener extends ListenerAdapter {
             }
         }
         // Player is not in the guild, try to send an invitation message
+        PrivateChannel privateChannel = (PrivateChannel) e.getChannel();
         if(!foundGuild) {
-            invite(e.getPrivateChannel(), u);
+            invite(privateChannel, u);
             return;
         }
 
         // Check for blocked
         if(Blocked.BLOCKED_IDS != null && Blocked.BLOCKED_IDS.contains(u.getId())) {
-            blocked(e.getPrivateChannel(), u);
+            blocked(privateChannel, u);
             return;
         }
 
@@ -131,7 +136,7 @@ public class DirectMessageListener extends ListenerAdapter {
                 "User",
                 sourceMessage.getTimeCreated(),
                 // Checkbox source message
-                embedMessage -> sourceMessage.addReaction("U+2705").queue(
+                embedMessage -> sourceMessage.addReaction(Emoji.fromUnicode("U+2705")).queue(
                     unused1 -> {
                         // Log to map file
                         Message msg = destinationMessage;

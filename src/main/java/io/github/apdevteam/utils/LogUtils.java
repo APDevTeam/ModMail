@@ -1,8 +1,10 @@
 package io.github.apdevteam.utils;
 
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.utils.FileUpload;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -143,7 +145,7 @@ public class LogUtils {
 
         // Upload log file to discord
         String msg = user.getName() + "#" + user.getDiscriminator() + " <" + user.getId() + ">";
-        channel.sendMessage(msg).addFile(log).queue(
+        channel.sendMessage(msg).addFiles(FileUpload.fromData(log)).queue(
             ((Consumer<Message>) message -> {
                 // Delete log file locally
                 if (!log.delete())

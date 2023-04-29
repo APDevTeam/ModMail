@@ -4,9 +4,10 @@ import io.github.apdevteam.ModMail;
 import io.github.apdevteam.config.Settings;
 import io.github.apdevteam.utils.EmbedUtils;
 import io.github.apdevteam.utils.LogUtils;
-import net.dv8tion.jda.api.entities.ChannelType;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +17,7 @@ public class DirectMessageDeletedListener extends ListenerAdapter {
     public void onMessageDelete(@NotNull MessageDeleteEvent e) {
         if(!e.isFromType(ChannelType.PRIVATE))
             return;
-        final User u = e.getPrivateChannel().getUser();
+        final User u = ((PrivateChannel) e.getChannel()).getUser();
         if(u.isBot() || u.getId().equals(Settings.TOKEN))
             return;
 
