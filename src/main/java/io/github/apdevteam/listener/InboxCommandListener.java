@@ -250,7 +250,10 @@ public class InboxCommandListener extends ListenerAdapter {
                             // Archive channel
                             dm -> LogUtils.archive(u, ModMail.getInstance().getArchiveChannel(),
                                 // Delete channel
-                                null,
+                                unused -> inboxChannel.delete().queue(
+                                    unused1 -> {},
+                                    error -> ModMail.getInstance().error("Failed to delete channel: " + error.getMessage())
+                                ),
                                 // Error logging
                                 error1 -> {
                                     ModMail.getInstance().error("Failed to close ModMail of " + u.getId() + ": " + error1.getMessage());
