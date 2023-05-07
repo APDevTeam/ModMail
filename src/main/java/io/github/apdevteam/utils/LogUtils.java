@@ -18,22 +18,13 @@ public class LogUtils {
     public final static String logExtension = "log";
     public final static String mapExtension = "map";
 
-    public static boolean create(@NotNull String userID) {
+    public static void create(@NotNull String userID) throws IOException, IllegalStateException {
         File log = new File(".", baseFolder + "/" + userID + "." + logExtension);
-        try {
-            if(!log.createNewFile())
-                return false;
-        } catch (IOException e) {
-            return false;
-        }
+        if(!log.createNewFile())
+            throw new IllegalStateException("Unable to create new log file.");
         File map = new File(".", baseFolder + "/" + userID + "." + mapExtension);
-        try {
-            if(!map.createNewFile())
-                return false;
-        } catch (IOException e) {
-            return false;
-        }
-        return true;
+        if(!map.createNewFile())
+            throw new IllegalStateException("Unable to create new map file.");
     }
 
     public static boolean log(

@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.function.Consumer;
 
@@ -79,7 +80,8 @@ public class ModMail {
             GatewayIntent.GUILD_MESSAGES,
             GatewayIntent.GUILD_MESSAGE_REACTIONS,
             GatewayIntent.DIRECT_MESSAGES,
-            GatewayIntent.DIRECT_MESSAGE_REACTIONS
+            GatewayIntent.DIRECT_MESSAGE_REACTIONS,
+            GatewayIntent.MESSAGE_CONTENT
         );
 
         // Add shutdown hook for CTRL+C
@@ -309,8 +311,11 @@ public class ModMail {
             throw new IllegalStateException("JDA is in an invalid state");
 
         // Create log
-        if(!LogUtils.create(user.getId())) {
-            ModMail.getInstance().error("Failed to create ModMail log for: '" + user + "'");
+        try {
+            LogUtils.create(user.getId());
+        }
+        catch (Exception e) {
+            ModMail.getInstance().error("Failed to create ModMail log for: '" + user + "' (" + user.getId() + ")\n\t- " + e.getMessage());
             return;
         }
 
