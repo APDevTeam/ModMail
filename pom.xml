@@ -6,7 +6,7 @@
 
     <groupId>io.github.apdevteam</groupId>
     <artifactId>ModMail</artifactId>
-    <version>0.6.3</version>
+    <version>0.6.4</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -96,12 +96,12 @@
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>5.0.0-beta.8</version>
+            <version>5.0.0-beta.18</version>
         </dependency>
         <dependency>
             <groupId>com.electronwill.night-config</groupId>
             <artifactId>toml</artifactId>
-            <version>3.6.6</version>
+            <version>3.6.7</version>
         </dependency>
     </dependencies>
 </project>
