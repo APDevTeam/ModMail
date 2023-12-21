@@ -2,10 +2,10 @@ package io.github.apdevteam.listener;
 
 import io.github.apdevteam.config.Settings;
 import io.github.apdevteam.utils.LogUtils;
-import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.utils.MiscUtil;
@@ -28,7 +28,7 @@ public class InboxListener extends ListenerAdapter {
         if(content.startsWith(Settings.PREFIX))
             return;
 
-        final TextChannel inboxChannel = msg.getTextChannel();
+        final TextChannel inboxChannel = (TextChannel) msg.getChannel();
         String userID = inboxChannel.getTopic();
         if(userID == null)
             return;

@@ -5,11 +5,12 @@ import io.github.apdevteam.config.Blocked;
 import io.github.apdevteam.config.Settings;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.UserSnowflake;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -129,9 +130,9 @@ public class EmbedUtils {
             embeds.add(formatAttachment(user, a, color, footer, timestamp));
         }
 
-        MessageAction action = channel.sendMessageEmbeds(embeds);
+        MessageCreateAction action = channel.sendMessageEmbeds(embeds);
         if(main != null)
-            action = action.reference(main);
+            action.setMessageReference(main);
 
         action.queue(
             callback,

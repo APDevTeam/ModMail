@@ -9,6 +9,9 @@ import io.github.apdevteam.utils.LogUtils;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.concrete.Category;
+import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
@@ -18,9 +21,9 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.security.auth.login.LoginException;
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.function.Consumer;
 
@@ -32,7 +35,7 @@ public class ModMail {
         return instance;
     }
 
-    public static void main(String @NotNull [] args) {
+    public static void main(String [] args) {
         if (!Settings.load()) {
             System.err.println("Failed to load Settings, please read the code for 'help'.");
             return;
@@ -63,7 +66,7 @@ public class ModMail {
         builder.disableCache(
             CacheFlag.ACTIVITY,
             CacheFlag.CLIENT_STATUS,
-            CacheFlag.EMOTE,
+            CacheFlag.EMOJI,
             CacheFlag.MEMBER_OVERRIDES,
             CacheFlag.ONLINE_STATUS,
             CacheFlag.ROLE_TAGS,
@@ -77,7 +80,8 @@ public class ModMail {
             GatewayIntent.GUILD_MESSAGES,
             GatewayIntent.GUILD_MESSAGE_REACTIONS,
             GatewayIntent.DIRECT_MESSAGES,
-            GatewayIntent.DIRECT_MESSAGE_REACTIONS
+            GatewayIntent.DIRECT_MESSAGE_REACTIONS,
+            GatewayIntent.MESSAGE_CONTENT
         );
 
         // Add shutdown hook for CTRL+C
@@ -86,7 +90,7 @@ public class ModMail {
         try {
             jda = builder.build();
             jda.awaitReady();
-        } catch (LoginException | InterruptedException e) {
+        } catch (InterruptedException e) {
             System.err.println("Failed to login to Discord!");
             e.printStackTrace();
             return;
@@ -307,8 +311,11 @@ public class ModMail {
             throw new IllegalStateException("JDA is in an invalid state");
 
         // Create log
-        if(!LogUtils.create(user.getId())) {
-            ModMail.getInstance().error("Failed to create ModMail log for: '" + user + "'");
+        try {
+            LogUtils.create(user.getId());
+        }
+        catch (Exception e) {
+            ModMail.getInstance().error("Failed to create ModMail log for: '" + user + "' (" + user.getId() + ")\n\t- " + e.getMessage());
             return;
         }
 
