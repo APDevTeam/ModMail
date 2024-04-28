@@ -19,12 +19,29 @@ public class LogUtils {
     public final static String mapExtension = "map";
 
     public static void create(@NotNull String userID) throws IOException, IllegalStateException {
-        File log = new File(".", baseFolder + "/" + userID + "." + logExtension);
-        if(!log.createNewFile())
-            throw new IllegalStateException("Unable to create new log file.");
-        File map = new File(".", baseFolder + "/" + userID + "." + mapExtension);
-        if(!map.createNewFile())
-            throw new IllegalStateException("Unable to create new map file.");
+        createFile(new File(".", baseFolder + "/" + userID + "." + logExtension));
+        createFile(new File(".", baseFolder + "/" + userID + "." + mapExtension));
+    }
+
+    private static void createFile(File file) throws IOException, IllegalStateException {
+        if (file.exists()) {
+            if (file.isDirectory()) {
+                throw new IllegalStateException("Unable to create " + file.getName() + ", is already a directory");
+            }
+            else if (!file.canRead()) {
+                throw new IllegalStateException("Unable to create " + file.getName() + ", is already a file without read");
+            }
+            else if (!file.canWrite()) {
+                throw new IllegalStateException("Unable to create " + file.getName() + ", is already a file without write");
+            }
+            else {
+                return;
+            }
+        }
+
+        if (!file.createNewFile()) {
+            throw new IllegalStateException("Unable to create " + file.getName());
+        }
     }
 
     public static boolean log(
