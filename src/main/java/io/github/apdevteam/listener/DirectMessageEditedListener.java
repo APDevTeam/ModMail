@@ -33,7 +33,7 @@ public class DirectMessageEditedListener extends ListenerAdapter {
 
         TextChannel inbox = ModMail.getInstance().getModMailInbox(u);
         if(inbox == null) {
-            ModMail.getInstance().error("Failed to get inbox for deleted message: " + u + ": " + deletedID);
+            ModMail.getInstance().error("Failed to get inbox for deleted message: " + u + ": " + deletedID, null);
             return;
         }
 

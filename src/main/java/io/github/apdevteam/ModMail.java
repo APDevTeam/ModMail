@@ -201,13 +201,13 @@ public class ModMail {
         System.out.println(message);
 
         if(logChannel == null)
-            error("JDA is in an invalid state");
+            error("JDA is in an invalid state", null);
 
         logChannel.sendMessageEmbeds(
             EmbedUtils.log(null, color, message)
         ).queue(
             null,
-            error -> error(error.getMessage())
+            error -> error(error.getMessage(), error)
         );
     }
 
@@ -218,7 +218,7 @@ public class ModMail {
             System.out.println(message);
 
         if(logChannel == null)
-            error("JDA is in an invalid state");
+            error("JDA is in an invalid state", null);
 
         logChannel.sendMessageEmbeds(
             EmbedUtils.log(title, color, message)
@@ -233,18 +233,18 @@ public class ModMail {
             EmbedUtils.warn(message)
         ).queue(
             null,
-            error -> error(error.getMessage())
+            error -> error(error.getMessage(), error)
         );
     }
 
-    public void error(@NotNull String message) {
+    public <T extends Throwable> void error(@NotNull String message, @Nullable T thrown) {
         System.err.println(message);
 
         if(logChannel == null)
             System.err.println("JDA is in an invalid state");
 
         logChannel.sendMessageEmbeds(
-            EmbedUtils.error(message)
+            EmbedUtils.error(message, thrown)
         ).queue(
             null,
             error ->  {
@@ -278,7 +278,7 @@ public class ModMail {
 
         jda.openPrivateChannelById(user.getId()).queue(
             callback,
-            error -> ModMail.getInstance().error("Failed to get ModMail for: '" + user.getName() + "#" + user.getDiscriminator() + "'")
+            error -> ModMail.getInstance().error("Failed to get ModMail for: '" + user.getName() + "'", error)
         );
     }
 
@@ -315,7 +315,7 @@ public class ModMail {
             LogUtils.create(user.getId());
         }
         catch (Exception e) {
-            ModMail.getInstance().error("Failed to create ModMail log for: '" + user + "' (" + user.getId() + ")\n\t- " + e.getMessage());
+            ModMail.getInstance().error("Failed to create ModMail log for: '" + user + "' (" + user.getId() + ")\n\t- " + e.getMessage(), e);
             return;
         }
 
@@ -325,7 +325,7 @@ public class ModMail {
                 // Then set topic
                 (Consumer<TextChannel>) channel -> channel.getManager().setTopic(user.getId()).queue(
                     null,
-                    error -> ModMail.getInstance().error("Failed to set topic for '" + channel + "'")
+                    error -> ModMail.getInstance().error("Failed to set topic for '" + channel + "'", error)
                 )
             ).andThen(
                 (
@@ -334,14 +334,14 @@ public class ModMail {
                         EmbedUtils.inboxOpened(user, timestamp)
                     ).queue(
                         null,
-                        error -> ModMail.getInstance().error("Failed to send initial message for '" + channel + "'")
+                        error -> ModMail.getInstance().error("Failed to send initial message for '" + channel + "'", error)
                     )
                 ).andThen(
                     // Then call callback
                     callback
                 )
             ),
-            error -> error("Failed to create channel for '" + user + "'")
+            error -> error("Failed to create channel for '" + user + "'", error)
         );
     }
 

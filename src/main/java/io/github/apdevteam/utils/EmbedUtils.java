@@ -73,7 +73,7 @@ public class EmbedUtils {
 
         channel.sendMessageEmbeds(embed).queue(
             callback,
-            error -> ModMail.getInstance().error("Failed to send '" + embed + "' in '" + channel + "'")
+            error -> ModMail.getInstance().error("Failed to send '" + embed + "' in '" + channel + "'", error)
         );
     }
 
@@ -104,7 +104,7 @@ public class EmbedUtils {
 
         source.replyEmbeds(embed).queue(
             callback,
-            error -> ModMail.getInstance().error("Failed to send '" + embed + "' in '" + source + "'")
+            error -> ModMail.getInstance().error("Failed to send '" + embed + "' in '" + source + "'", error)
         );
     }
 
@@ -136,7 +136,7 @@ public class EmbedUtils {
 
         action.queue(
             callback,
-            error -> ModMail.getInstance().error("Failed to send attachments: " + error.getMessage())
+            error -> ModMail.getInstance().error("Failed to send attachments: " + error.getMessage(), error)
         );
     }
 
@@ -542,14 +542,24 @@ public class EmbedUtils {
         );
     }
 
-    public static @NotNull MessageEmbed error(@NotNull String message) {
-        return buildEmbed(
+    public static <T extends Throwable> MessageEmbed error(@NotNull String message, @Nullable T thrown) {
+        return thrown == null ? buildEmbed(
             null,
             null,
             null,
             ColorUtils.error(),
             message,
             null,
+            null,
+            null,
+            null
+        ) : buildEmbed(
+            null,
+            null,
+            message,
+            ColorUtils.error(),
+            thrown.getMessage(),
+            thrown.getStackTrace().toString(),
             null,
             null,
             null

@@ -72,22 +72,22 @@ public class DirectMessageListener extends ListenerAdapter {
                                 EmbedUtils.playerOpened()
                             ).queue(
                                 null,
-                                error -> ModMail.getInstance().error("Failed to send initial message for '" + channel + "'")
+                                error -> ModMail.getInstance().error("Failed to send initial message for '" + channel + "'", error)
                             );
 
                             // Log message
                             if(!LogUtils.log(u.getId(), "Player", u.getName(), u.getId(), msg.getContentDisplay()))
-                                ModMail.getInstance().error("Failed to log message '" + u + ": " + msg.getContentDisplay() + "'");
+                                ModMail.getInstance().error("Failed to log message '" + u + ": " + msg.getContentDisplay() + "'", null);
                             for(Message.Attachment a : msg.getAttachments()) {
                                 if (!LogUtils.log(u.getId(), "Player", u.getName(), u.getId(), "Attachment <" + a.getContentType() + ">: " + a.getUrl()))
-                                    ModMail.getInstance().error("Failed to log attachment '" + u + ": " + a.getUrl() + "'");
+                                    ModMail.getInstance().error("Failed to log attachment '" + u + ": " + a.getUrl() + "'", null);
                             }
                         }
                     )
                 );
             }
             catch (InsufficientPermissionException exception) { // Catch exception for no permissions
-                ModMail.getInstance().error(exception.getMessage());
+                ModMail.getInstance().error(exception.getMessage(), exception);
                 //exception.printStackTrace();
             }
             return;
@@ -95,10 +95,10 @@ public class DirectMessageListener extends ListenerAdapter {
 
         // Log message
         if(!LogUtils.log(u.getId(), "Player", u.getName(), u.getId(), msg.getContentDisplay()))
-            ModMail.getInstance().error("Failed to log message '" + u + ": " + msg.getContentDisplay() + "'");
+            ModMail.getInstance().error("Failed to log message '" + u + ": " + msg.getContentDisplay() + "'", null);
         for(Message.Attachment a : msg.getAttachments()) {
             if (!LogUtils.log(u.getId(), "Player", u.getName(), u.getId(), "Attachment <" + a.getContentType() + ">: " + a.getUrl()))
-                ModMail.getInstance().error("Failed to log attachment '" + u + ": " + a.getUrl() + "'");
+                ModMail.getInstance().error("Failed to log attachment '" + u + ": " + a.getUrl() + "'", null);
         }
 
         // Forward message
@@ -108,14 +108,14 @@ public class DirectMessageListener extends ListenerAdapter {
     private void invite(final @NotNull PrivateChannel channel, final @NotNull User author) {
         channel.sendMessageEmbeds(EmbedUtils.invite()).queue(
             null,
-            error -> ModMail.getInstance().error("Failed to send invite embed to '" + author + "'")
+            error -> ModMail.getInstance().error("Failed to send invite embed to '" + author + "'", error)
         );
     }
 
     private void blocked(final @NotNull PrivateChannel channel, final @NotNull User author) {
         channel.sendMessageEmbeds(EmbedUtils.blocked()).queue(
             null,
-            error -> ModMail.getInstance().error("Failed to send blocked embed to '" + author + "'")
+            error -> ModMail.getInstance().error("Failed to send blocked embed to '" + author + "'", error)
         );
     }
 
@@ -144,9 +144,9 @@ public class DirectMessageListener extends ListenerAdapter {
                             msg = embedMessage;
 
                         if(!LogUtils.map(u.getId(), "Player", sourceMessage.getId(), msg.getId()))
-                            ModMail.getInstance().error("Failed to map '" + sourceMessage + "' to '" + msg + "'");
+                            ModMail.getInstance().error("Failed to map '" + sourceMessage + "' to '" + msg + "'", null);
                     },
-                    error -> ModMail.getInstance().error("Failed to checkbox '" + sourceMessage + "' in '" + inboxChannel + "'")
+                    error -> ModMail.getInstance().error("Failed to checkbox '" + sourceMessage + "' in '" + inboxChannel + "'", error)
                 )
             ),
             "User",

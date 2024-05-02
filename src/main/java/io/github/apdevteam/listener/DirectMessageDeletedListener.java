@@ -31,7 +31,7 @@ public class DirectMessageDeletedListener extends ListenerAdapter {
 
         TextChannel inbox = ModMail.getInstance().getModMailInbox(u);
         if(inbox == null) {
-            ModMail.getInstance().error("Failed to get inbox for deleted message: " + u + ": " + deletedID);
+            ModMail.getInstance().error("Failed to get inbox for deleted message: " + u + ": " + deletedID, null);
             return;
         }
 
@@ -40,9 +40,9 @@ public class DirectMessageDeletedListener extends ListenerAdapter {
                 EmbedUtils.deleted()
             ).queue(
                 null,
-                error -> ModMail.getInstance().error("Failed to send message for deleted message: " + u + ": " + deletedID)
+                error -> ModMail.getInstance().error("Failed to send message for deleted message: " + u + ": " + deletedID, error)
             ),
-            error -> ModMail.getInstance().error("Failed to get message for deleted message: " + u + ": " + deletedID)
+            error -> ModMail.getInstance().error("Failed to get message for deleted message: " + u + ": " + deletedID, error)
         );
     }
 }

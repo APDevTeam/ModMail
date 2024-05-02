@@ -82,7 +82,7 @@ public class DirectMessageCommandListener extends ListenerAdapter {
             EmbedUtils.openBeforeCmd()
         ).queue(
             null,
-            error -> ModMail.getInstance().error("Failed to send command warning: " + error.getMessage())
+            error -> ModMail.getInstance().error("Failed to send command warning: " + error.getMessage(), error)
         );
     }
 
@@ -91,7 +91,7 @@ public class DirectMessageCommandListener extends ListenerAdapter {
             EmbedUtils.invite()
         ).queue(
             null,
-            error -> ModMail.getInstance().error("Failed to send invite embed to '" + author + "'")
+            error -> ModMail.getInstance().error("Failed to send invite embed to '" + author + "'", error)
         );
     }
 
@@ -100,7 +100,7 @@ public class DirectMessageCommandListener extends ListenerAdapter {
             EmbedUtils.blocked()
         ).queue(
             null,
-            error -> ModMail.getInstance().error("Failed to send blocked embed to '" + author + "'")
+            error -> ModMail.getInstance().error("Failed to send blocked embed to '" + author + "'", error)
         );
     }
 
@@ -110,11 +110,11 @@ public class DirectMessageCommandListener extends ListenerAdapter {
                 EmbedUtils.invalidCmd(msg)
             ).queue(
                 null,
-                error -> ModMail.getInstance().error("Failed to send invalid DM command: " + error.getMessage())
+                error -> ModMail.getInstance().error("Failed to send invalid DM command: " + error.getMessage(), error)
             );
         }
         catch (InsufficientPermissionException e) {
-            ModMail.getInstance().error("Failed to send invalid DM command: " + e.getMessage());
+            ModMail.getInstance().error("Failed to send invalid DM command: " + e.getMessage(), e);
         }
     }
 
@@ -123,7 +123,7 @@ public class DirectMessageCommandListener extends ListenerAdapter {
             EmbedUtils.addError()
         ).queue(
             null,
-            error -> ModMail.getInstance().error("Failed to send add warning: " + error.getMessage())
+            error -> ModMail.getInstance().error("Failed to send add warning: " + error.getMessage(), error)
         );
     }
 
@@ -136,7 +136,7 @@ public class DirectMessageCommandListener extends ListenerAdapter {
                 EmbedUtils.closeFailed()
             ).queue(
                 null,
-                error -> ModMail.getInstance().error("Failed to send close warning: " + error.getMessage())
+                error -> ModMail.getInstance().error("Failed to send close warning: " + error.getMessage(), error)
             );
             return;
         }
@@ -154,22 +154,22 @@ public class DirectMessageCommandListener extends ListenerAdapter {
                     // Delete channel
                     unused2 -> inboxChannel.delete().queue(
                         null,
-                        error -> ModMail.getInstance().error("Failed to delete channel: " + error.getMessage())
+                        error -> ModMail.getInstance().error("Failed to delete channel: " + error.getMessage(), error)
                     ),
                     // Error logging
                     error -> {
-                        ModMail.getInstance().error("Failed to close ModMail of " + u.getId() + ": " + error.getMessage());
+                        ModMail.getInstance().error("Failed to close ModMail of " + u.getId() + ": " + error.getMessage(), error);
                         privateChannel.sendMessageEmbeds(
                             EmbedUtils.closeFailed()
                         ).queue(
                             null,
-                            bad -> ModMail.getInstance().error("Failed to inform inbox of close failure: " + bad.getMessage())
+                            bad -> ModMail.getInstance().error("Failed to inform inbox of close failure: " + bad.getMessage(), bad)
                         );
                     }
                 ),
-                error -> ModMail.getInstance().error("Failed to inform DM of close: " + error.getMessage())
+                error -> ModMail.getInstance().error("Failed to inform DM of close: " + error.getMessage(), error)
             ),
-            error -> ModMail.getInstance().error("Failed to inform inbox of close: " + error.getMessage())
+            error -> ModMail.getInstance().error("Failed to inform inbox of close: " + error.getMessage(), error)
         );
     }
 }

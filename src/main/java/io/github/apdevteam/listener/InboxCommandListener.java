@@ -78,13 +78,13 @@ public class InboxCommandListener extends ListenerAdapter {
                         ).queue(
                             message -> msg.delete().queue(
                                 null,
-                                error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage())
+                                error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage(), error)
                             ),
-                            error -> ModMail.getInstance().error("Failed to send open ModMail warning: " + error.getMessage())
+                            error -> ModMail.getInstance().error("Failed to send open ModMail warning: " + error.getMessage(), error)
                         );
                     }
                     catch (InsufficientPermissionException error) {
-                        ModMail.getInstance().error("Failed to delete message: " + error.getMessage());
+                        ModMail.getInstance().error("Failed to delete message: " + error.getMessage(), error);
                     }
                     return;
                 }
@@ -101,7 +101,7 @@ public class InboxCommandListener extends ListenerAdapter {
                             privateChannel -> {
                                 // Log message
                                 if(!LogUtils.log(u.getId(), "Staff", author.getName(), author.getId(), "[Opened thread]"))
-                                    ModMail.getInstance().error("Failed to log message '" + u + ": " + msg.getContentDisplay() + "'");
+                                    ModMail.getInstance().error("Failed to log message '" + u + ": " + msg.getContentDisplay() + "'", null);
 
                                 // Inform player
                                 privateChannel.sendMessageEmbeds(
@@ -110,23 +110,23 @@ public class InboxCommandListener extends ListenerAdapter {
                                     // Delete command
                                     message -> msg.delete().queue(
                                         null,
-                                        error -> ModMail.getInstance().error("Failed to delete open command: " + error.getMessage())
+                                        error -> ModMail.getInstance().error("Failed to delete open command: " + error.getMessage(), error)
                                     ),
-                                    error -> ModMail.getInstance().error("Failed to send open ModMail message: " + error.getMessage())
+                                    error -> ModMail.getInstance().error("Failed to send open ModMail message: " + error.getMessage(), error)
                                 );
                             }
                         )
                     );
                 }
                 catch (InsufficientPermissionException error) {
-                    ModMail.getInstance().error("Failed to delete message: " + error.getMessage());
+                    ModMail.getInstance().error("Failed to delete message: " + error.getMessage(), error);
                 }
             },
             ignored -> msg.getChannel().sendMessageEmbeds(
                 EmbedUtils.invalidID()
             ).queue(
                 null,
-                error -> ModMail.getInstance().error("Failed warn invalid ID: " + error.getMessage())
+                error -> ModMail.getInstance().error("Failed warn invalid ID: " + error.getMessage(), error)
             )
         );
     }
@@ -150,10 +150,10 @@ public class InboxCommandListener extends ListenerAdapter {
                 final String content = msg.getContentDisplay().substring(6).trim();
                 try {
                     if(!LogUtils.log(u.getId(), "Reply", msg.getAuthor().getName(), msg.getAuthor().getId(), content))
-                        ModMail.getInstance().error("Failed to log message '" + u + ": " + msg + "'");
+                        ModMail.getInstance().error("Failed to log message '" + u + ": " + msg + "'", null);
                     for(Message.Attachment a : msg.getAttachments()) {
                         if (!LogUtils.log(u.getId(), "Reply", msg.getAuthor().getName(), msg.getAuthor().getId(), "Attachment <" + a.getContentType() + ">: " + a.getUrl()))
-                            ModMail.getInstance().error("Failed to log attachment '" + u + ": " + a.getUrl() + "'");
+                            ModMail.getInstance().error("Failed to log attachment '" + u + ": " + a.getUrl() + "'", null);
                     }
 
                     // Get private ModMail channel
@@ -199,7 +199,7 @@ public class InboxCommandListener extends ListenerAdapter {
                                     // Delete original message
                                     message -> msg.delete().queue(
                                         null,
-                                        error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage())
+                                        error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage(), error)
                                     )
                                 )
                             ),
@@ -209,14 +209,14 @@ public class InboxCommandListener extends ListenerAdapter {
                     );
                 }
                 catch (InsufficientPermissionException error) {
-                    ModMail.getInstance().error("Failed to delete: " + error.getMessage());
+                    ModMail.getInstance().error("Failed to delete: " + error.getMessage(), error);
                 }
             },
             ignored -> msg.getChannel().sendMessageEmbeds(
                 EmbedUtils.invalidID()
             ).queue(
                 null,
-                error -> ModMail.getInstance().error("Failed warn invalid ID: " + error.getMessage())
+                error -> ModMail.getInstance().error("Failed warn invalid ID: " + error.getMessage(), error)
             )
         );
     }
@@ -252,26 +252,26 @@ public class InboxCommandListener extends ListenerAdapter {
                                 // Delete channel
                                 unused -> inboxChannel.delete().queue(
                                     unused1 -> {},
-                                    error -> ModMail.getInstance().error("Failed to delete channel: " + error.getMessage())
+                                    error -> ModMail.getInstance().error("Failed to delete channel: " + error.getMessage(), error)
                                 ),
                                 // Error logging
                                 error1 -> {
-                                    ModMail.getInstance().error("Failed to close ModMail of " + u.getId() + ": " + error1.getMessage());
+                                    ModMail.getInstance().error("Failed to close ModMail of " + u.getId() + ": " + error1.getMessage(), error1);
                                     inboxChannel.sendMessageEmbeds(
                                         EmbedUtils.closeFailed()
                                     ).queue(
                                         null,
-                                        error2 -> ModMail.getInstance().error("Failed to inform inbox of close failure: " + error2.getMessage())
+                                        error2 -> ModMail.getInstance().error("Failed to inform inbox of close failure: " + error2.getMessage(), error2)
                                     );
                                 }
                             ),
-                            error -> ModMail.getInstance().error("Failed to inform DM of close: " + error.getMessage())
+                            error -> ModMail.getInstance().error("Failed to inform DM of close: " + error.getMessage(), error)
                         )
                     ),
-                    error -> ModMail.getInstance().error("Failed to inform inbox of close: " + error.getMessage())
+                    error -> ModMail.getInstance().error("Failed to inform inbox of close: " + error.getMessage(), error)
                 );
             },
-            error -> ModMail.getInstance().error("Failed to get user for close: " + error.getMessage())
+            error -> ModMail.getInstance().error("Failed to get user for close: " + error.getMessage(), error)
         );
     }
 
@@ -307,41 +307,41 @@ public class InboxCommandListener extends ListenerAdapter {
                                     null,
                                     error -> ModMail.getInstance().warn("Failed to inform DM of close: " + error.getMessage())
                                 ),
-                                error -> ModMail.getInstance().error("Failed to delete channel: " + error.getMessage())
+                                error -> ModMail.getInstance().error("Failed to delete channel: " + error.getMessage(), error)
                             ),
                             // Error logging
                             error1 -> {
-                                ModMail.getInstance().error("Failed to close ModMail of " + u.getId() + ": " + error1.getMessage());
+                                ModMail.getInstance().error("Failed to close ModMail of " + u.getId() + ": " + error1.getMessage(), error1);
                                 inboxChannel.sendMessageEmbeds(
                                     EmbedUtils.closeFailed()
                                 ).queue(
                                     null,
-                                    error2 -> ModMail.getInstance().error("Failed to inform inbox of close failure: " + error2.getMessage())
+                                    error2 -> ModMail.getInstance().error("Failed to inform inbox of close failure: " + error2.getMessage(), error2)
                                 );
                             }
                         )
                     ),
-                    error -> ModMail.getInstance().error("Failed to inform inbox of close: " + error.getMessage())
+                    error -> ModMail.getInstance().error("Failed to inform inbox of close: " + error.getMessage(), error)
                 );
             },
-            error -> ModMail.getInstance().error("Failed to get user for close: " + error.getMessage())
+            error -> ModMail.getInstance().error("Failed to get user for close: " + error.getMessage(), error)
         );
     }
 
     private void block(final @NotNull Message msg) {
         Member author = msg.getMember();
         if(author == null) {
-            ModMail.getInstance().error("Null author of: " + msg);
+            ModMail.getInstance().error("Null author of: " + msg, null);
             return;
         }
         if(Settings.MODERATOR_ROLES == null) {
-            ModMail.getInstance().error("Null blocked users: " + msg);
+            ModMail.getInstance().error("Null blocked users: " + msg, null);
             return;
         }
         if(!isModerator(author, Settings.MODERATOR_ROLES)) {
             msg.delete().queue(
                 null,
-                error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage())
+                error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage(), error)
             );
             return;
         }
@@ -403,17 +403,17 @@ public class InboxCommandListener extends ListenerAdapter {
     private void unblock(final @NotNull Message msg) {
         Member author = msg.getMember();
         if(author == null) {
-            ModMail.getInstance().error("Null author of: " + msg);
+            ModMail.getInstance().error("Null author of: " + msg, null);
             return;
         }
         if(Settings.MODERATOR_ROLES == null) {
-            ModMail.getInstance().error("Null blocked users: " + msg);
+            ModMail.getInstance().error("Null blocked users: " + msg, null);
             return;
         }
         if(!isModerator(author, Settings.MODERATOR_ROLES)) {
             msg.delete().queue(
                 null,
-                error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage())
+                error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage(), error)
             );
             return;
         }
@@ -442,7 +442,7 @@ public class InboxCommandListener extends ListenerAdapter {
     private void add(final @NotNull Message msg) {
         msg.getChannel().sendMessageEmbeds(EmbedUtils.addError()).queue(
             null,
-            error -> ModMail.getInstance().error("Failed to send add warning: " + error.getMessage())
+            error -> ModMail.getInstance().error("Failed to send add warning: " + error.getMessage(), error)
         );
     }
 
@@ -459,13 +459,13 @@ public class InboxCommandListener extends ListenerAdapter {
             channel.sendMessageEmbeds(EmbedUtils.notInbox(msg.getTimeCreated())).queue(
                 message -> msg.delete().queue(
                     null,
-                    error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage())
+                    error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage(), error)
                 ),
-                error -> ModMail.getInstance().error("Failed to warn reply: " + error.getMessage())
+                error -> ModMail.getInstance().error("Failed to warn reply: " + error.getMessage(), error)
             );
         }
         catch (InsufficientPermissionException error) {
-            ModMail.getInstance().error("Failed to delete: " + error.getMessage());
+            ModMail.getInstance().error("Failed to delete: " + error.getMessage(), error);
         }
     }
 
@@ -474,13 +474,13 @@ public class InboxCommandListener extends ListenerAdapter {
             msg.getChannel().sendMessageEmbeds(EmbedUtils.invalidCmd(msg)).queue(
                 message -> msg.delete().queue(
                     null,
-                    error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage())
+                    error -> ModMail.getInstance().error("Failed to delete: " + error.getMessage(), error)
                 ),
-                error -> ModMail.getInstance().error("Failed to send invalid command: " + error.getMessage())
+                error -> ModMail.getInstance().error("Failed to send invalid command: " + error.getMessage(), error)
             );
         }
         catch (InsufficientPermissionException e) {
-            ModMail.getInstance().error("Failed to send invalid command: " + e.getMessage());
+            ModMail.getInstance().error("Failed to send invalid command: " + e.getMessage(), e);
         }
     }
 
@@ -492,9 +492,9 @@ public class InboxCommandListener extends ListenerAdapter {
             // Delete command
             message -> msg.delete().queue(
                 null,
-                error -> ModMail.getInstance().error("Failed to delete unblocked: " + unblocked.getId())
+                error -> ModMail.getInstance().error("Failed to delete unblocked: " + unblocked.getId(), error)
             ),
-            error -> ModMail.getInstance().error("Failed to send unblocked: " + msg)
+            error -> ModMail.getInstance().error("Failed to send unblocked: " + msg, error)
         );
     }
 
@@ -506,9 +506,9 @@ public class InboxCommandListener extends ListenerAdapter {
             // Delete command
             message -> msg.delete().queue(
                 null,
-                error -> ModMail.getInstance().error("Failed to delete unblocked: " + unblocked.getId())
+                error -> ModMail.getInstance().error("Failed to delete unblocked: " + unblocked.getId(), error)
             ),
-            error -> ModMail.getInstance().error("Failed to send unblocked: " + msg)
+            error -> ModMail.getInstance().error("Failed to send unblocked: " + msg, error)
         );
     }
 
@@ -518,9 +518,9 @@ public class InboxCommandListener extends ListenerAdapter {
         ).queue(
             message -> msg.delete().queue(
                 null,
-                error -> ModMail.getInstance().error("Failed to delete blocked: " + blocked.getId())
+                error -> ModMail.getInstance().error("Failed to delete blocked: " + blocked.getId(), error)
             ),
-            error -> ModMail.getInstance().error("Failed to send blocked: " + msg)
+            error -> ModMail.getInstance().error("Failed to send blocked: " + msg, error)
         );
     }
 
@@ -530,9 +530,9 @@ public class InboxCommandListener extends ListenerAdapter {
         ).queue(
             message -> msg.delete().queue(
                 null,
-                error -> ModMail.getInstance().error("Failed to delete blocked: " + msg)
+                error -> ModMail.getInstance().error("Failed to delete blocked: " + msg, error)
             ),
-            error -> ModMail.getInstance().error("Failed to send blocked: " + msg)
+            error -> ModMail.getInstance().error("Failed to send blocked: " + msg, error)
         );
     }
 
@@ -563,13 +563,13 @@ public class InboxCommandListener extends ListenerAdapter {
                     )).build()
             ).mentionRepliedUser(false).queue(
                     null,
-                    error -> ModMail.getInstance().error("Failed to send remind msg: " + error.getMessage())
+                    error -> ModMail.getInstance().error("Failed to send remind msg: " + error.getMessage(), error)
             );
             msg.reply(
                     new MessageCreateBuilder().setEmbeds(EmbedUtils.remind("Reminder!")).build()
             ).mentionRepliedUser(ping).queueAfter(time, unit,
                     null,
-                    error -> ModMail.getInstance().error("Failed to send reminder: " + error.getMessage())
+                    error -> ModMail.getInstance().error("Failed to send reminder: " + error.getMessage(), error)
             );
         }
         catch (ArrayIndexOutOfBoundsException | IllegalArgumentException e) {
@@ -577,7 +577,7 @@ public class InboxCommandListener extends ListenerAdapter {
                     new MessageCreateBuilder().setEmbeds(EmbedUtils.remindFailed()).build()
             ).mentionRepliedUser(false).queue(
                 null,
-                error -> ModMail.getInstance().error("Failed to send remind failed: " + error.getMessage())
+                error -> ModMail.getInstance().error("Failed to send remind failed: " + error.getMessage(), error)
             );
         }
     }
