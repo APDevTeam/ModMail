@@ -17,7 +17,6 @@ import org.jetbrains.annotations.Nullable;
 import java.awt.*;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -544,22 +543,22 @@ public class EmbedUtils {
 
     public static <T extends Throwable> MessageEmbed error(@NotNull String message, @Nullable T thrown) {
         return thrown == null ? buildEmbed(
-            null,
-            null,
-            null,
-            ColorUtils.error(),
-            message,
-            null,
-            null,
-            null,
-            null
+                null,
+                null,
+                null,
+                ColorUtils.error(),
+                message,
+                null,
+                null,
+                null,
+                null
         ) : buildEmbed(
             null,
             null,
             message,
             ColorUtils.error(),
             thrown.getMessage(),
-            thrown.getStackTrace().toString(),
+            null,
             null,
             null,
             null
