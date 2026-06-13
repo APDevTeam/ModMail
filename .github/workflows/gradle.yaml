@@ -47,6 +47,6 @@ jobs:
         run: mkdir staging && cp build/libs/ModMail.jar staging && mv staging/ModMail.jar staging/ModMail_${{ github.event.release.tag_name }}.jar
       - name: Upload jar to Release
         if: ${{ github.event_name == 'release' }}
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: staging/ModMail_${{ github.event.release.tag_name }}.jar
