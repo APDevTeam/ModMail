@@ -1,4 +1,4 @@
-FROM gradle:8.10-jdk25 AS build
+FROM gradle:9.5-jdk25 AS build
 WORKDIR /app
 COPY . .
 RUN gradle shadowJar --no-daemon
