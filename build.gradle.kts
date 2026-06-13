@@ -19,7 +19,7 @@ dependencies {
 group = "io.github.apdevteam"
 version = "0.6.9"
 description = "ModMail"
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
 tasks.jar {
     manifest {
