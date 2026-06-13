@@ -2,7 +2,7 @@
 # https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
 
 [versions]
-com-electronwill-night-config-toml = "3.6.7"
+com-electronwill-night-config-toml = "3.9.0"
 net-dv8tion-jda = "6.4.2"
 
 [libraries]
