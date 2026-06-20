@@ -1,9 +1,5 @@
-FROM gradle:9.5-jdk25 AS build
+FROM eclipse-temurin:21-jre
 WORKDIR /app
-COPY . .
-RUN gradle shadowJar --no-daemon
-
-FROM eclipse-temurin:25-jre
-WORKDIR /app
-COPY --from=build /app/build/libs/ModMail.jar .
+ARG RELEASE_VERSION
+ADD https://github.com/APDevTeam/ModMail/releases/download/${RELEASE_VERSION}/ModMail_${RELEASE_VERSION}.jar ModMail.jar
 CMD ["java", "-jar", "ModMail.jar"]
