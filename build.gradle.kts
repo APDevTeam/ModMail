@@ -29,6 +29,10 @@ version = System.getenv("RELEASE_VERSION")
 description = "ModMail"
 java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
+println(">>> Resolved version: $version")
+println(">>> RELEASE_VERSION env: ${System.getenv("RELEASE_VERSION")}")
+println(">>> GITHUB_SHA env: ${System.getenv("GITHUB_SHA")}")
+
 tasks.jar {
     manifest {
         attributes(
