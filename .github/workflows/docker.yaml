@@ -1,12 +1,14 @@
 name: Publish Docker image
 
 on:
-  release:
-    types: [created, prereleased]
+  workflow_run:
+    workflows: ["Gradle CI"]
+    types: [completed]
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'release' }}
     permissions:
       contents: read
       packages: write
@@ -29,7 +31,7 @@ jobs:
           file: ./Dockerfile
           push: true
           build-args: |
-            RELEASE_VERSION=${{ github.event.release.tag_name }}
+            RELEASE_VERSION=${{ github.event.workflow_run.head_branch }}
           tags: |
-            ghcr.io/apdevteam/modmail:${{ github.event.release.tag_name }}
+            ghcr.io/apdevteam/modmail:${{ github.event.workflow_run.head_branch }}
             ghcr.io/apdevteam/modmail:latest
