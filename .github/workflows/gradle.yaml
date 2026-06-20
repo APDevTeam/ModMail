@@ -50,4 +50,5 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           files: staging/ModMail_${{ github.event.release.tag_name }}.jar
+          tag_name: ${{ github.event.release.tag_name }}
           token: ${{ secrets.GITHUB_TOKEN }}
