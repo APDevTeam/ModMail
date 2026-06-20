@@ -54,3 +54,13 @@ jobs:
           files: staging/ModMail_${{ github.event.release.tag_name }}.jar
           tag_name: ${{ github.event.release.tag_name }}
           token: ${{ secrets.GITHUB_TOKEN }}
+
+  docker:
+    needs: build
+    if: ${{ github.event_name == 'release' }}
+    uses: ./.github/workflows/docker.yml
+    with:
+      release_version: ${{ github.event.release.tag_name }}
+    permissions:
+      contents: read
+      packages: write
