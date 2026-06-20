@@ -18,13 +18,14 @@ dependencies {
 
 group = "io.github.apdevteam"
 version = System.getenv("RELEASE_VERSION")?.takeIf { it.isNotBlank() }
-    ?: System.getenv("GITHUB_SHA")?.take(7)
     ?: runCatching {
         val sha = ProcessBuilder("git", "rev-parse", "--short", "HEAD")
             .start().inputStream.bufferedReader().readLine() ?: "unknown"
+        val tag = ProcessBuilder("git", "describe", "--tags", "--abbrev=0")
+            .start().inputStream.bufferedReader().readLine() ?: "untagged"
         val dirty = ProcessBuilder("git", "status", "--porcelain")
             .start().inputStream.bufferedReader().readLine() != null
-        if (dirty) "$sha-dirty" else sha
+        if (dirty) "$tag+$sha-dirty" else "$tag+$sha"
     }.getOrElse { "unknown" }
 description = "ModMail"
 java.toolchain.languageVersion = JavaLanguageVersion.of(25)
