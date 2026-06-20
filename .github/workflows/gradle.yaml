@@ -58,7 +58,7 @@ jobs:
   docker:
     needs: build
     if: ${{ github.event_name == 'release' }}
-    uses: ./.github/workflows/docker.yml
+    uses: ./.github/workflows/docker.yaml
     with:
       release_version: ${{ github.event.release.tag_name }}
     permissions:
