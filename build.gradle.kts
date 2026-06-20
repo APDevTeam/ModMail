@@ -17,7 +17,7 @@ dependencies {
 }
 
 group = "io.github.apdevteam"
-version = "0.7.0"
+version = "0.7.1"
 description = "ModMail"
 java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
