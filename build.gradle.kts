@@ -17,7 +17,15 @@ dependencies {
 }
 
 group = "io.github.apdevteam"
-version = "0.7.4"
+version = System.getenv("RELEASE_VERSION")
+    ?: System.getenv("GITHUB_SHA")?.take(7)
+    ?: runCatching {
+        val sha = ProcessBuilder("git", "rev-parse", "--short", "HEAD")
+            .start().inputStream.bufferedReader().readLine() ?: "unknown"
+        val dirty = ProcessBuilder("git", "status", "--porcelain")
+            .start().inputStream.bufferedReader().readLine() != null
+        if (dirty) "$sha-dirty" else sha
+    }.getOrElse { "unknown" }
 description = "ModMail"
 java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 

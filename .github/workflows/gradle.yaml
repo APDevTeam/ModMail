@@ -31,6 +31,8 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew clean shadowJar --parallel
+        env:
+          RELEASE_VERSION: ${{ github.event.release.tag_name }}
 
       - name: Stage jar for Actions
         if: ${{ github.event_name != 'release' }}
