@@ -13,7 +13,7 @@ dependencies {
       exclude(module="opus-java")
       exclude(module="tink")
     }
-    api(libs.com.electronwill.night.config.toml)
+    api("com.electronwill.night-config:toml:3.9.0")
 }
 
 group = "io.github.apdevteam"
